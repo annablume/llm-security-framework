@@ -48,3 +48,6 @@ secrets/
 credentials/
 .cursorignore.backup
 security-incidents/
+
+# Security-sensitive scripts (bypass security controls - INTERNAL USE ONLY)
+scripts/push-to-all.sh

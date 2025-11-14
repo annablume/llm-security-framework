@@ -59,5 +59,8 @@ docs/architecture/sensitive/
 # Git
 .git/
 
+# Security-sensitive scripts (bypass security controls)
+scripts/push-to-all.sh
+
 # Dependencies
 node_modules/
