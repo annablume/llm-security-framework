@@ -1,0 +1,433 @@
+# .cursorignore - Cursor AI Context Protection
+# Version: 2.0
+# 
+# This file prevents sensitive files from being loaded into Cursor's AI context.
+# CRITICAL: Cursor loads your entire workspace into Claude's context window.
+# Any file NOT ignored here could be exposed to the AI model.
+# 
+# Place this file in your repository root.
+# 
+# Documentation: https://docs.cursor.com/context/ignore-files
+
+# ============================================================================
+# SECRETS & CREDENTIALS
+# ============================================================================
+# CRITICAL: Never expose these to AI context
+
+# Environment files
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+*.cer
+*.der
+
+# Secret directories
+secrets/
+credentials/
+certs/
+private/
+.secrets/
+
+# SSH keys
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+*.ppk
+
+# GPG keys
+*.gpg
+*.asc
+secring.gpg
+pubring.gpg
+
+# ============================================================================
+# CLOUD PROVIDER CONFIGURATIONS
+# ============================================================================
+# These often contain access credentials
+
+# AWS
+.aws/
+*.pem
+
+# Google Cloud
+.gcloud/
+*-key.json
+service-account*.json
+
+# Azure
+.azure/
+*.azureauth
+
+# Digital Ocean
+.do/
+
+# ============================================================================
+# DATABASE & SERVICE CONFIGURATIONS
+# ============================================================================
+
+# Database configs with credentials
+config/database.yml
+config/secrets.yml
+database.yml
+
+# Supabase
+supabase/.env
+supabase/.env.local
+
+# Redis
+redis.conf
+dump.rdb
+
+# MongoDB
+mongod.conf
+
+# PostgreSQL
+postgresql.conf
+pg_hba.conf
+
+# ============================================================================
+# APPLICATION CONFIGURATIONS
+# ============================================================================
+
+# Netlify (may contain secrets)
+netlify.toml
+!netlify.toml.example
+
+# Docker compose overrides (often contain secrets)
+docker-compose.override.yml
+docker-compose.local.yml
+
+# Kubernetes secrets
+**/secrets.yaml
+**/secrets.yml
+*secret*.yaml
+
+# ============================================================================
+# PACKAGE MANAGER CREDENTIALS
+# ============================================================================
+
+# NPM
+.npmrc
+!.npmrc.example
+
+# Yarn
+.yarnrc
+.yarnrc.yml
+!.yarnrc.example
+
+# Pip
+.pip/pip.conf
+
+# Bundler
+.bundle/config
+
+# Poetry
+poetry.toml
+!poetry.toml.example
+
+# Cargo
+.cargo/credentials
+
+# ============================================================================
+# BUILD ARTIFACTS & GENERATED FILES
+# ============================================================================
+# These can be large and may contain embedded secrets
+
+# Build directories
+dist/
+build/
+out/
+.output/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+.turbo/
+
+# Coverage reports
+coverage/
+.nyc_output/
+*.lcov
+.coverage
+
+# Compiled code
+*.pyc
+*.pyo
+__pycache__/
+*.class
+*.o
+*.so
+*.dylib
+*.dll
+
+# ============================================================================
+# LOGS
+# ============================================================================
+# Logs often contain sensitive data, API responses, errors with stack traces
+
+*.log
+logs/
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+pnpm-debug.log*
+
+# Application logs
+app.log
+error.log
+access.log
+debug.log
+
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
+# Large directories that slow down context loading
+
+node_modules/
+jspm_packages/
+bower_components/
+vendor/
+venv/
+env/
+.venv/
+.virtualenv/
+
+# Python
+site-packages/
+*.egg-info/
+
+# Go
+vendor/
+
+# Rust
+target/
+
+# ============================================================================
+# IDE & EDITOR FILES
+# ============================================================================
+# May contain project-specific configurations or local paths
+
+# VS Code / Cursor
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+!.vscode/settings.example.json
+
+# Cursor-specific
+.cursor/
+.cursorrules
+
+# IntelliJ / JetBrains
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ============================================================================
+# OPERATING SYSTEM FILES
+# ============================================================================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+.directory
+.Trash-*
+
+# ============================================================================
+# VERSION CONTROL
+# ============================================================================
+
+.git/
+.gitignore
+.gitattributes
+.svn/
+.hg/
+
+# ============================================================================
+# TESTING WITH REAL DATA
+# ============================================================================
+# Test fixtures that contain real/production data
+
+# Test fixtures with real data
+tests/fixtures/real-data/
+tests/fixtures/production/
+cypress/fixtures/production/
+cypress/screenshots/
+cypress/videos/
+
+# Database dumps
+*.sql
+*.dump
+*.backup
+
+# ============================================================================
+# DOCUMENTATION WITH SENSITIVE INFO
+# ============================================================================
+
+# Architecture docs that might reveal security details
+docs/infrastructure/
+docs/architecture/sensitive/
+docs/security/internal/
+
+# API documentation with real endpoints/keys
+docs/api/production/
+
+# ============================================================================
+# BACKUPS
+# ============================================================================
+
+*.bak
+*.backup
+*.old
+*.orig
+*~
+
+# Database backups
+*.sql.gz
+*.dump.gz
+
+# ============================================================================
+# TEMPORARY FILES
+# ============================================================================
+
+tmp/
+temp/
+*.tmp
+*.temp
+.cache/
+
+# ============================================================================
+# MEDIA & ASSETS
+# ============================================================================
+# Large files that slow down context loading
+
+# Images (if large)
+# *.jpg
+# *.jpeg
+# *.png
+# *.gif
+
+# Videos
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# Audio
+*.mp3
+*.wav
+*.flac
+
+# Large data files
+*.csv
+*.json
+*.xml
+# Uncomment above if you have large data files
+
+# ============================================================================
+# BINARY FILES
+# ============================================================================
+
+*.exe
+*.dll
+*.so
+*.dylib
+*.bin
+
+# ============================================================================
+# ARCHIVES
+# ============================================================================
+
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+# ============================================================================
+# PROJECT-SPECIFIC (CUSTOMIZE FOR YOUR PROJECT)
+# ============================================================================
+
+# Add your project-specific sensitive files here:
+# config/local.json
+# data/users.json
+# reports/analytics.csv
+
+# ============================================================================
+# EXAMPLES
+# ============================================================================
+
+# Example files that should be safe
+!*.example
+!*.template
+!*.sample
+
+# ============================================================================
+# IMPORTANT NOTES
+# ============================================================================
+# 
+# 1. VERIFY THIS FILE IS WORKING:
+#    Open Cursor > Cmd/Ctrl+Shift+P > "Cursor: Show Indexed Files"
+#    Verify sensitive files are NOT in the list
+# 
+# 2. UPDATE REGULARLY:
+#    - When adding new services/tools
+#    - When team identifies new sensitive file types
+#    - Monthly security review
+# 
+# 3. PATTERNS:
+#    - * matches any characters except /
+#    - ** matches any characters including /
+#    - ! negates a pattern (includes the file)
+#    - Patterns are case-sensitive on case-sensitive filesystems
+# 
+# 4. TESTING:
+#    After updating this file:
+#    - Restart Cursor
+#    - Check "Show Indexed Files"
+#    - Test with actual sensitive files
+# 
+# 5. SHARE WITH TEAM:
+#    Commit this file to Git so all team members are protected
+# 
+# 6. COMPLEMENTARY PROTECTIONS:
+#    This file protects Cursor's context, but also:
+#    - Use .gitignore for version control
+#    - Use pre-commit hooks for secret scanning
+#    - Enable GitHub secret scanning with push protection
+#    - Regularly audit what Cursor can see
+# 
+# ============================================================================

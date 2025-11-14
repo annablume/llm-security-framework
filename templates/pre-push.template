@@ -1,0 +1,388 @@
+#!/bin/bash
+# Pre-push Git Hook - Comprehensive Security Checks
+# Version: 2.0
+# 
+# This hook runs comprehensive security checks before pushing to remote.
+# Install: Copy to .git/hooks/pre-push and make executable
+# 
+# Installation:
+#   chmod +x pre-push
+#   cp pre-push .git/hooks/pre-push
+
+set -e
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m'
+
+echo -e "${BLUE}🔒 Running pre-push security checks...${NC}"
+echo ""
+
+# Get information about what we're pushing
+remote="$1"
+url="$2"
+
+# Read stdin to get the commits being pushed
+while read local_ref local_sha remote_ref remote_sha
+do
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+        # Branch being deleted, skip checks
+        continue
+    fi
+    
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+        # New branch, check all commits
+        range="$local_sha"
+    else
+        # Existing branch, check new commits
+        range="$remote_sha..$local_sha"
+    fi
+done
+
+# ============================================================================
+# CHECK 1: FULL REPOSITORY SECRET SCAN
+# ============================================================================
+
+echo "1️⃣  Scanning entire repository for secrets..."
+
+if command -v gitleaks &> /dev/null; then
+    # Scan entire repository history
+    gitleaks detect --source . --verbose --report-path /tmp/gitleaks-report.json
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo -e "${RED}❌ PUSH BLOCKED: Secrets found in repository history${NC}"
+        echo ""
+        echo "CRITICAL: Secrets detected in Git history"
+        echo ""
+        echo "Immediate actions required:"
+        echo "  1. DO NOT push these commits"
+        echo "  2. Review: cat /tmp/gitleaks-report.json"
+        echo "  3. Follow incident response procedure"
+        echo "  4. Use BFG Repo Cleaner to remove secrets from history"
+        echo "  5. Rotate ALL potentially exposed credentials"
+        echo ""
+        echo "For help: ./scripts/security/secret-leak-response.sh"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ No secrets found in repository${NC}"
+else
+    echo -e "${YELLOW}⚠️  Gitleaks not installed, skipping full scan${NC}"
+    echo "   CRITICAL: Install gitleaks for secret scanning"
+    exit 1
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 2: BRANCH PROTECTION CHECK
+# ============================================================================
+
+echo "2️⃣  Checking branch protection..."
+
+current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+protected_branches=("main" "master" "production" "prod")
+
+if [[ " ${protected_branches[@]} " =~ " ${current_branch} " ]]; then
+    echo -e "${RED}❌ PUSH BLOCKED: Direct push to protected branch '$current_branch'${NC}"
+    echo ""
+    echo "Protected branches require pull requests"
+    echo ""
+    echo "What to do:"
+    echo "  1. Create a feature branch: git checkout -b feature/your-feature"
+    echo "  2. Push to feature branch: git push origin feature/your-feature"
+    echo "  3. Create a pull request on GitHub"
+    echo "  4. Wait for review and approval"
+    exit 1
+fi
+
+echo -e "${GREEN}✓ Not pushing to protected branch${NC}"
+echo ""
+
+# ============================================================================
+# CHECK 3: RUN TESTS
+# ============================================================================
+
+echo "3️⃣  Running tests..."
+
+if [ -f "package.json" ] && grep -q '"test"' package.json; then
+    echo "Running npm tests..."
+    npm test
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo -e "${RED}❌ PUSH BLOCKED: Tests failed${NC}"
+        echo ""
+        echo "Fix failing tests before pushing"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ All tests passed${NC}"
+elif [ -f "pytest.ini" ] || [ -f "setup.py" ]; then
+    echo "Running Python tests..."
+    pytest
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo -e "${RED}❌ PUSH BLOCKED: Tests failed${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ All tests passed${NC}"
+else
+    echo -e "${YELLOW}⚠️  No test configuration found, skipping tests${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 4: DEPENDENCY AUDIT
+# ============================================================================
+
+echo "4️⃣  Auditing dependencies..."
+
+if [ -f "package.json" ]; then
+    echo "Running npm audit..."
+    npm audit --audit-level=moderate
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo -e "${YELLOW}⚠️  Dependency vulnerabilities found${NC}"
+        echo ""
+        read -p "Continue pushing with vulnerabilities? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✓ No dependency vulnerabilities${NC}"
+    fi
+elif [ -f "requirements.txt" ]; then
+    if command -v safety &> /dev/null; then
+        echo "Running safety check..."
+        safety check
+        
+        if [ $? -ne 0 ]; then
+            echo ""
+            echo -e "${YELLOW}⚠️  Python dependency vulnerabilities found${NC}"
+            read -p "Continue? (y/N) " -n 1 -r
+            echo
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                exit 1
+            fi
+        fi
+    else
+        echo -e "${YELLOW}⚠️  Safety not installed (pip install safety)${NC}"
+    fi
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 5: BUILD VERIFICATION
+# ============================================================================
+
+echo "5️⃣  Verifying build..."
+
+if [ -f "package.json" ] && grep -q '"build"' package.json; then
+    echo "Running build..."
+    npm run build
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo -e "${RED}❌ PUSH BLOCKED: Build failed${NC}"
+        echo ""
+        echo "Fix build errors before pushing"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Build successful${NC}"
+else
+    echo -e "${YELLOW}⚠️  No build script found, skipping build${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 6: LINTING
+# ============================================================================
+
+echo "6️⃣  Running linter..."
+
+if [ -f "package.json" ] && grep -q '"lint"' package.json; then
+    echo "Running eslint..."
+    npm run lint
+    
+    if [ $? -ne 0 ]; then
+        echo ""
+        echo -e "${YELLOW}⚠️  Linting errors found${NC}"
+        read -p "Continue with linting errors? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+    else
+        echo -e "${GREEN}✓ No linting errors${NC}"
+    fi
+else
+    echo -e "${YELLOW}⚠️  No linting configured, skipping${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 7: COMMIT MESSAGE VALIDATION
+# ============================================================================
+
+echo "7️⃣  Validating commit messages..."
+
+# Check if commits follow conventional commits format (optional)
+# Uncomment to enable
+# 
+# if [ -n "$range" ]; then
+#     bad_commits=$(git log --format=%B $range | grep -v -E "^(feat|fix|docs|style|refactor|test|chore)(\(.+\))?: .+")
+#     
+#     if [ -n "$bad_commits" ]; then
+#         echo -e "${YELLOW}⚠️  Some commits don't follow Conventional Commits format${NC}"
+#         echo "$bad_commits"
+#         read -p "Continue anyway? (y/N) " -n 1 -r
+#         echo
+#         if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+#             exit 1
+#         fi
+#     fi
+# fi
+
+echo -e "${GREEN}✓ Commit messages validated${NC}"
+echo ""
+
+# ============================================================================
+# CHECK 8: FILE SIZE CHECK
+# ============================================================================
+
+echo "8️⃣  Checking for large files in history..."
+
+# Check if any files are too large (>5MB)
+large_files=$(git rev-list --objects --all | \
+    git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | \
+    awk '/^blob/ {if($3 > 5242880) print $4, $3/1048576 "MB"}' | \
+    sort -k2 -n -r | \
+    head -10)
+
+if [ -n "$large_files" ]; then
+    echo -e "${YELLOW}⚠️  Large files found in repository:${NC}"
+    echo "$large_files"
+    echo ""
+    echo "Consider using Git LFS for large files"
+    read -p "Continue? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+else
+    echo -e "${GREEN}✓ No large files in history${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 9: TODO/FIXME CHECK (optional)
+# ============================================================================
+
+echo "9️⃣  Checking for TODO/FIXME comments..."
+
+todo_count=$(git diff $remote_sha..$local_sha | grep -E "^\+.*TODO|^\+.*FIXME" | wc -l)
+
+if [ $todo_count -gt 0 ]; then
+    echo -e "${YELLOW}⚠️  Found $todo_count TODO/FIXME comments in new code${NC}"
+    git diff $remote_sha..$local_sha | grep -n -E "^\+.*TODO|^\+.*FIXME" | head -5
+    echo ""
+    echo "Consider resolving these before pushing"
+    read -p "Continue anyway? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+else
+    echo -e "${GREEN}✓ No TODO/FIXME comments${NC}"
+fi
+
+echo ""
+
+# ============================================================================
+# CHECK 10: REMOTE CONNECTION
+# ============================================================================
+
+echo "🔟 Verifying remote connection..."
+
+if [ -n "$url" ]; then
+    echo "Pushing to: $url"
+    
+    # Check if pushing to expected remote
+    if [[ ! "$url" =~ github.com ]] && [[ ! "$url" =~ gitlab.com ]] && [[ ! "$url" =~ bitbucket.org ]]; then
+        echo -e "${YELLOW}⚠️  Unusual remote URL detected${NC}"
+        echo "Remote: $url"
+        read -p "Is this correct? (y/N) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 1
+        fi
+    fi
+fi
+
+echo -e "${GREEN}✓ Remote verified${NC}"
+echo ""
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+
+echo ""
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${GREEN}✅ All pre-push checks passed!${NC}"
+echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo ""
+echo "Pushing to remote..."
+echo ""
+
+# Allow push to proceed
+exit 0
+
+# ============================================================================
+# TROUBLESHOOTING
+# ============================================================================
+# 
+# If you need to bypass this hook (emergencies only):
+#   git push --no-verify
+# 
+# If you get false positives:
+#   1. Review the specific check that failed
+#   2. Fix the issue if legitimate
+#   3. Update hook configuration if needed
+#   4. Temporarily disable: chmod -x .git/hooks/pre-push
+# 
+# Common issues:
+#   - Tests failing: Fix tests, don't skip
+#   - Build failing: Fix build, don't skip
+#   - Secrets found: NEVER bypass, follow incident response
+#   - Protected branch: Create PR, don't force push
+# 
+# ============================================================================
+# CUSTOMIZATION
+# ============================================================================
+# 
+# Disable specific checks:
+#   Comment out the check section
+# 
+# Add custom checks:
+#   Add new sections following the same pattern
+# 
+# Adjust severity:
+#   Change exit 1 to continue for warnings
+# 
+# Project-specific tests:
+#   Add custom test commands
+#   Add deployment verification
+#   Add performance benchmarks
+# 
+# ============================================================================
