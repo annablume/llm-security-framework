@@ -38,3 +38,13 @@ lerna-debug.log*
 # Vite
 .vite
 
+
+# LLM Security
+.env*
+!.env.example
+*.key
+*.pem
+secrets/
+credentials/
+.cursorignore.backup
+security-incidents/
