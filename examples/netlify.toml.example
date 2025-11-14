@@ -1,0 +1,493 @@
+# Netlify Configuration - Security Hardened
+# Version: 2.0
+# 
+# This is a TEMPLATE file showing secure Netlify configuration
+# Copy this to netlify.toml in your repository root
+# 
+# IMPORTANT: Never commit secrets to this file
+# Set secrets via Netlify UI or CLI instead
+
+# ============================================================================
+# BUILD SETTINGS
+# ============================================================================
+
+[build]
+  # Build command - customize for your project
+  command = "npm run build"
+  
+  # Output directory - where your built files are
+  publish = "dist"
+  
+  # Functions directory (for serverless functions)
+  functions = "netlify/functions"
+  
+  # Edge functions directory
+  edge_functions = "netlify/edge-functions"
+
+# Build environment variables (non-sensitive only)
+[build.environment]
+  # Node.js version
+  NODE_VERSION = "20"
+  
+  # Build optimizations
+  NODE_ENV = "production"
+  NPM_FLAGS = "--legacy-peer-deps"
+  
+  # ❌ NEVER PUT SECRETS HERE
+  # NEXT_PUBLIC_SUPABASE_ANON_KEY = "xxxx"  # OK - public key
+  # SUPABASE_SERVICE_KEY = "xxxx"           # ❌ NEVER - use Netlify UI
+
+# ============================================================================
+# CONTEXT-SPECIFIC SETTINGS
+# ============================================================================
+
+# Production context
+[context.production]
+  # Production-specific build command
+  command = "npm run build:production"
+  
+  # Production environment variables (non-sensitive)
+  [context.production.environment]
+    NEXT_PUBLIC_API_URL = "https://api.yourdomain.com"
+    NEXT_PUBLIC_ENV = "production"
+    NODE_ENV = "production"
+
+# Deploy Preview context (for pull requests)
+[context.deploy-preview]
+  command = "npm run build:preview"
+  
+  [context.deploy-preview.environment]
+    NEXT_PUBLIC_API_URL = "https://staging-api.yourdomain.com"
+    NEXT_PUBLIC_ENV = "preview"
+    NODE_ENV = "development"
+    # Add robots noindex for preview deploys
+    ROBOTS_NOINDEX = "true"
+
+# Branch deploys (e.g., develop branch)
+[context.branch-deploy]
+  command = "npm run build:development"
+  
+  [context.branch-deploy.environment]
+    NEXT_PUBLIC_API_URL = "https://dev-api.yourdomain.com"
+    NEXT_PUBLIC_ENV = "development"
+    NODE_ENV = "development"
+
+# Specific branch configuration (example: staging branch)
+[context.staging]
+  command = "npm run build:staging"
+  
+  [context.staging.environment]
+    NEXT_PUBLIC_API_URL = "https://staging-api.yourdomain.com"
+    NEXT_PUBLIC_ENV = "staging"
+
+# ============================================================================
+# REDIRECTS & REWRITES
+# ============================================================================
+
+# API proxy (to hide backend URL)
+[[redirects]]
+  from = "/api/*"
+  to = "https://your-backend-api.com/:splat"
+  status = 200
+  force = true
+  
+  # Security headers for API proxy
+  [redirects.headers]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+
+# Redirect HTTP to HTTPS
+[[redirects]]
+  from = "http://yourdomain.com/*"
+  to = "https://yourdomain.com/:splat"
+  status = 301
+  force = true
+
+# Redirect www to non-www (or vice versa)
+[[redirects]]
+  from = "https://www.yourdomain.com/*"
+  to = "https://yourdomain.com/:splat"
+  status = 301
+  force = true
+
+# Single Page Application (SPA) fallback
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# ============================================================================
+# SECURITY HEADERS
+# ============================================================================
+
+# Global security headers for all pages
+[[headers]]
+  for = "/*"
+  
+  [headers.values]
+    # Prevent clickjacking
+    X-Frame-Options = "DENY"
+    
+    # Prevent MIME type sniffing
+    X-Content-Type-Options = "nosniff"
+    
+    # XSS Protection (legacy browsers)
+    X-XSS-Protection = "1; mode=block"
+    
+    # Referrer Policy
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    
+    # Permissions Policy (formerly Feature Policy)
+    Permissions-Policy = '''
+      accelerometer=(),
+      camera=(),
+      geolocation=(),
+      gyroscope=(),
+      magnetometer=(),
+      microphone=(),
+      payment=(),
+      usb=()
+    '''
+    
+    # Content Security Policy (CSP)
+    # ⚠️ CUSTOMIZE THIS FOR YOUR APP
+    Content-Security-Policy = '''
+      default-src 'self';
+      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.example.com;
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      img-src 'self' data: https: blob:;
+      font-src 'self' https://fonts.gstatic.com;
+      connect-src 'self' https://*.supabase.co https://api.example.com;
+      frame-ancestors 'none';
+      base-uri 'self';
+      form-action 'self';
+      upgrade-insecure-requests;
+    '''
+    
+    # Strict Transport Security (HSTS)
+    # Force HTTPS for 2 years, including subdomains
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+
+# API-specific headers
+[[headers]]
+  for = "/api/*"
+  
+  [headers.values]
+    # CORS headers (adjust for your needs)
+    Access-Control-Allow-Origin = "https://yourdomain.com"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Access-Control-Max-Age = "86400"
+    
+    # No caching for API responses
+    Cache-Control = "no-store, no-cache, must-revalidate, proxy-revalidate"
+    Pragma = "no-cache"
+    Expires = "0"
+
+# Static assets caching
+[[headers]]
+  for = "/static/*"
+  
+  [headers.values]
+    # Cache static assets for 1 year
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.js"
+  
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Images caching
+[[headers]]
+  for = "/*.jpg"
+  
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.png"
+  
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.webp"
+  
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# No caching for HTML
+[[headers]]
+  for = "/*.html"
+  
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# ============================================================================
+# FUNCTIONS CONFIGURATION
+# ============================================================================
+
+[functions]
+  # Directory for serverless functions
+  directory = "netlify/functions"
+  
+  # Node.js version for functions
+  node_bundler = "esbuild"
+  
+  # Include specific files in function bundles
+  # included_files = ["path/to/file"]
+  
+  # Exclude files from function bundles
+  # excluded_files = ["**/*.test.js"]
+
+# Individual function configuration
+[functions."api-handler"]
+  # Custom timeout (max 26 seconds on free tier, 60s on paid)
+  timeout = 10
+  
+  # Memory limit (128-3008 MB, in 64 MB increments)
+  memory = 256
+
+# Rate limiting for functions (requires paid plan)
+# [functions."api-handler".rate_limit]
+#   window_size = 60  # seconds
+#   window_limit = 100  # requests per window
+
+# ============================================================================
+# EDGE FUNCTIONS CONFIGURATION
+# ============================================================================
+
+[[edge_functions]]
+  function = "auth-guard"
+  path = "/dashboard/*"
+
+[[edge_functions]]
+  function = "geo-redirect"
+  path = "/*"
+
+# ============================================================================
+# PLUGINS
+# ============================================================================
+
+# Security plugins
+
+# Password protection for deploy previews
+# [[plugins]]
+#   package = "@netlify/plugin-password-protection"
+#   
+#   [plugins.inputs]
+#     password = ""  # Set via environment variable DEPLOY_PASSWORD
+
+# Lighthouse CI for performance/security audits
+# [[plugins]]
+#   package = "@netlify/plugin-lighthouse"
+#   
+#   [plugins.inputs]
+#     output_path = "reports/lighthouse.html"
+
+# Security headers check
+# [[plugins]]
+#   package = "netlify-plugin-checklinks"
+
+# ============================================================================
+# FORMS (if using Netlify Forms)
+# ============================================================================
+
+# Spam protection
+[forms]
+  spam_filter = true
+
+# ============================================================================
+# SPLIT TESTING (A/B Testing)
+# ============================================================================
+
+# Example: Test two branches
+# [[split_test]]
+#   branch = "main"
+#   branch = "experiment"
+#   split = 50/50
+
+# ============================================================================
+# ENVIRONMENT VARIABLE MANAGEMENT GUIDE
+# ============================================================================
+
+# HOW TO SET SECRETS SECURELY:
+
+# Method 1: Netlify UI
+# 1. Go to Site Settings > Environment Variables
+# 2. Add variable with appropriate scope:
+#    - All deploys
+#    - Production
+#    - Deploy previews
+#    - Branch deploys
+
+# Method 2: Netlify CLI
+# netlify env:set SUPABASE_SERVICE_KEY "your-secret-key" --scope production
+# netlify env:set API_KEY "your-api-key" --scope deploy-preview
+
+# Method 3: netlify.toml (only for non-secrets)
+# See [build.environment] sections above
+
+# SCOPES EXPLAINED:
+# - production: Only available in production deploys
+# - deploy-preview: Only in PR preview deploys
+# - branch-deploy: Only in branch deploys
+# - all: Available in all contexts (use carefully)
+
+# ============================================================================
+# REQUIRED ENVIRONMENT VARIABLES (Set via Netlify UI)
+# ============================================================================
+
+# PUBLIC VARIABLES (safe to expose to client)
+# NEXT_PUBLIC_SUPABASE_URL=https://xxxxx.supabase.co
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGc...
+# NEXT_PUBLIC_SITE_URL=https://yourdomain.com
+
+# SECRET VARIABLES (NEVER in netlify.toml, NEVER in code)
+# SUPABASE_SERVICE_ROLE_KEY=eyJhbGc...
+# DATABASE_URL=postgresql://...
+# API_SECRET_KEY=xxx
+# STRIPE_SECRET_KEY=sk_xxx
+# JWT_SECRET=xxx
+
+# BUILD VARIABLES
+# CI=true
+# NODE_ENV=production
+
+# ============================================================================
+# SECURITY CHECKLIST
+# ============================================================================
+
+# Before deploying, verify:
+# ✓ No secrets in netlify.toml
+# ✓ All secrets set via Netlify UI with correct scopes
+# ✓ CSP headers configured for your app
+# ✓ HSTS enabled (Strict-Transport-Security)
+# ✓ Appropriate CORS settings
+# ✓ X-Frame-Options prevents clickjacking
+# ✓ Rate limiting configured (if needed)
+# ✓ Deploy preview password protection (optional)
+# ✓ Robots noindex for non-production deploys
+# ✓ HTTPS redirect enabled
+# ✓ Security headers tested (securityheaders.com)
+
+# ============================================================================
+# ADVANCED SECURITY CONFIGURATIONS
+# ============================================================================
+
+# Geo-blocking (requires Enterprise plan)
+# [context.production.redirect]
+#   [[context.production.redirect.rules]]
+#     from = "/*"
+#     to = "/blocked.html"
+#     status = 403
+#     conditions = {Country = ["CN", "RU"]}  # Block specific countries
+
+# IP-based access control (requires Enterprise plan)
+# [[redirects]]
+#   from = "/admin/*"
+#   to = "/unauthorized.html"
+#   status = 403
+#   force = true
+#   conditions = {ip = ["!192.168.1.0/24"]}  # Only allow specific IP range
+
+# ============================================================================
+# MONITORING & ALERTING
+# ============================================================================
+
+# Enable deploy notifications
+# Set in Netlify UI: Site settings > Build & deploy > Deploy notifications
+# - Deploy started
+# - Deploy succeeded
+# - Deploy failed
+# - Deploy preview ready
+
+# Slack/Email webhooks for security events
+# Configure via Netlify UI or API
+
+# ============================================================================
+# PERFORMANCE & OPTIMIZATION
+# ============================================================================
+
+# Build plugins for optimization
+# [[plugins]]
+#   package = "@netlify/plugin-nextjs"  # For Next.js optimization
+
+# [[plugins]]
+#   package = "netlify-plugin-image-optim"  # Image optimization
+
+# Asset optimization
+[build.processing]
+  skip_processing = false
+
+[build.processing.css]
+  bundle = true
+  minify = true
+
+[build.processing.js]
+  bundle = true
+  minify = true
+
+[build.processing.html]
+  pretty_urls = true
+
+[build.processing.images]
+  compress = true
+
+# ============================================================================
+# DEBUGGING
+# ============================================================================
+
+# Enable build logs
+# Set environment variable: DEBUG=* (via Netlify UI)
+
+# Function logs
+# View in: Netlify UI > Functions > [function name] > Logs
+
+# ============================================================================
+# ADDITIONAL RESOURCES
+# ============================================================================
+
+# Official Documentation:
+# - https://docs.netlify.com/configure-builds/file-based-configuration/
+# - https://docs.netlify.com/routing/headers/
+# - https://docs.netlify.com/functions/overview/
+# - https://docs.netlify.com/edge-functions/overview/
+
+# Security Best Practices:
+# - https://docs.netlify.com/security/secure-access-to-sites/
+# - https://securityheaders.com (test your headers)
+# - https://observatory.mozilla.org (security assessment)
+
+# ============================================================================
+# VERSION HISTORY
+# ============================================================================
+
+# Version 2.0 - November 2025
+# - Added comprehensive security headers
+# - Added context-specific configurations
+# - Added environment variable management guide
+# - Added CSP configuration
+# - Added rate limiting examples
+# - Added security checklist
+
+# ============================================================================
+# NOTES
+# ============================================================================
+
+# This configuration is a TEMPLATE showing security best practices
+# Customize it for your specific application needs
+# Test all configurations in deploy previews before production
+# Regularly review and update security headers
+# Monitor Netlify changelog for new security features
+
+# For questions or issues, contact your security team or:
+# - Netlify Support: https://www.netlify.com/support/
+# - Community: https://answers.netlify.com/

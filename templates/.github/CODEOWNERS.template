@@ -1,0 +1,308 @@
+# CODEOWNERS - Code Ownership and Review Requirements
+# 
+# This file defines who must review changes to specific files or directories.
+# When someone opens a pull request that modifies code in these areas,
+# the specified teams/individuals will automatically be requested as reviewers.
+#
+# Syntax: <path pattern>  <owner1> <owner2> ...
+# 
+# Documentation: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# ============================================================================
+# GLOBAL DEFAULT OWNERS
+# ============================================================================
+# These owners will be requested for all changes unless a more specific rule matches
+* @org/developers
+
+# ============================================================================
+# SECURITY-SENSITIVE FILES
+# ============================================================================
+# Security team MUST review these changes
+
+# Environment and configuration
+.env.example                    @org/security-team
+.env.*                          @org/security-team
+netlify.toml                    @org/security-team @org/platform-team
+vercel.json                     @org/security-team @org/platform-team
+
+# Supabase configuration
+supabase/config.toml            @org/security-team @org/backend-team
+supabase/migrations/            @org/backend-team @org/database-admin
+supabase/functions/             @org/security-team @org/backend-team
+
+# Database
+prisma/schema.prisma            @org/backend-team @org/database-admin
+prisma/migrations/              @org/backend-team @org/database-admin
+**/migrations/                  @org/backend-team
+
+# ============================================================================
+# INFRASTRUCTURE & DEVOPS
+# ============================================================================
+
+# Docker
+Dockerfile                      @org/security-team @org/devops-team
+docker-compose*.yml             @org/security-team @org/devops-team
+.dockerignore                   @org/devops-team
+
+# Kubernetes
+k8s/                            @org/security-team @org/devops-team
+*.yaml                          @org/devops-team
+*.yml                           @org/devops-team
+
+# Terraform
+terraform/                      @org/security-team @org/devops-team
+*.tf                            @org/security-team @org/devops-team
+*.tfvars                        @org/security-team @org/devops-team
+
+# CI/CD
+.github/workflows/              @org/security-team @org/devops-team
+.gitlab-ci.yml                  @org/security-team @org/devops-team
+.circleci/                      @org/security-team @org/devops-team
+Jenkinsfile                     @org/security-team @org/devops-team
+
+# ============================================================================
+# DEPENDENCY MANAGEMENT
+# ============================================================================
+# Security team must review dependency changes
+
+# Node.js
+package.json                    @org/security-team
+package-lock.json               @org/security-team
+yarn.lock                       @org/security-team
+pnpm-lock.yaml                  @org/security-team
+
+# Python
+requirements.txt                @org/security-team
+Pipfile                         @org/security-team
+Pipfile.lock                    @org/security-team
+poetry.lock                     @org/security-team
+
+# Go
+go.mod                          @org/security-team
+go.sum                          @org/security-team
+
+# Ruby
+Gemfile                         @org/security-team
+Gemfile.lock                    @org/security-team
+
+# Rust
+Cargo.toml                      @org/security-team
+Cargo.lock                      @org/security-team
+
+# ============================================================================
+# AUTHENTICATION & AUTHORIZATION
+# ============================================================================
+
+# Auth implementations
+**/auth/                        @org/security-team @org/backend-team
+**/authentication/              @org/security-team @org/backend-team
+**/authorization/               @org/security-team @org/backend-team
+**/login/                       @org/security-team @org/backend-team
+**/signup/                      @org/security-team @org/backend-team
+
+# Middleware
+**/middleware/auth*             @org/security-team
+**/middleware/security*         @org/security-team
+**/middleware/rbac*             @org/security-team
+
+# API authentication
+**/api/auth/                    @org/security-team @org/backend-team
+**/api/login/                   @org/security-team @org/backend-team
+**/api/token/                   @org/security-team @org/backend-team
+
+# ============================================================================
+# API & BACKEND
+# ============================================================================
+
+# API routes
+**/api/                         @org/backend-team
+**/routes/                      @org/backend-team
+
+# GraphQL
+**/graphql/                     @org/backend-team
+**/*.graphql                    @org/backend-team
+
+# gRPC
+**/*.proto                      @org/backend-team
+
+# ============================================================================
+# FRONTEND & UI
+# ============================================================================
+
+# React/Next.js pages
+**/pages/                       @org/frontend-team
+**/app/                         @org/frontend-team
+**/components/                  @org/frontend-team
+
+# Styling
+**/*.css                        @org/frontend-team
+**/*.scss                       @org/frontend-team
+**/*.sass                       @org/frontend-team
+**/tailwind.config.*            @org/frontend-team
+
+# ============================================================================
+# SECURITY IMPLEMENTATIONS
+# ============================================================================
+
+# Security utilities
+**/utils/security*              @org/security-team
+**/utils/encryption*            @org/security-team
+**/utils/crypto*                @org/security-team
+
+# Rate limiting
+**/ratelimit*                   @org/security-team
+**/rate-limit*                  @org/security-team
+
+# CORS
+**/cors*                        @org/security-team
+
+# CSP (Content Security Policy)
+**/csp*                         @org/security-team
+
+# ============================================================================
+# PAYMENT & FINANCIAL
+# ============================================================================
+
+**/payment/                     @org/security-team @org/backend-team @org/finance-team
+**/billing/                     @org/security-team @org/backend-team @org/finance-team
+**/checkout/                    @org/security-team @org/backend-team @org/finance-team
+**/stripe/                      @org/security-team @org/backend-team
+**/paypal/                      @org/security-team @org/backend-team
+
+# ============================================================================
+# DATA & PRIVACY
+# ============================================================================
+
+# User data models
+**/models/user*                 @org/security-team @org/backend-team
+**/models/account*              @org/security-team @org/backend-team
+
+# PII handling
+**/pii/                         @org/security-team @org/backend-team @org/legal-team
+**/gdpr/                        @org/security-team @org/legal-team
+**/privacy/                     @org/security-team @org/legal-team
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+# Security tests
+**/*.security.test.*            @org/security-team
+**/*.security.spec.*            @org/security-team
+**/security-tests/              @org/security-team
+
+# Integration tests
+**/*.integration.test.*         @org/backend-team
+**/*.e2e.test.*                 @org/qa-team
+
+# ============================================================================
+# DOCUMENTATION
+# ============================================================================
+
+# Security documentation
+docs/security/                  @org/security-team
+docs/architecture/              @org/security-team @org/engineering-leads
+SECURITY.md                     @org/security-team
+
+# API documentation
+docs/api/                       @org/backend-team
+**/openapi.yaml                 @org/backend-team
+**/swagger.yaml                 @org/backend-team
+
+# Infrastructure documentation
+docs/infrastructure/            @org/security-team @org/devops-team
+
+# ============================================================================
+# CONFIGURATION FILES
+# ============================================================================
+
+# Editor configuration
+.vscode/                        @org/devops-team
+.idea/                          @org/devops-team
+.editorconfig                   @org/devops-team
+
+# AI assistant configuration
+.cursorignore                   @org/security-team
+.cursor/                        @org/security-team
+
+# Git configuration
+.gitignore                      @org/devops-team
+.gitattributes                  @org/devops-team
+
+# ============================================================================
+# BUILD & DEPLOYMENT
+# ============================================================================
+
+# Build configuration
+webpack.config.js               @org/frontend-team @org/devops-team
+vite.config.js                  @org/frontend-team @org/devops-team
+rollup.config.js                @org/frontend-team @org/devops-team
+tsconfig.json                   @org/frontend-team @org/backend-team
+
+# Next.js
+next.config.js                  @org/frontend-team @org/security-team
+
+# ============================================================================
+# SCRIPTS
+# ============================================================================
+
+# Deployment scripts
+scripts/deploy/                 @org/security-team @org/devops-team
+scripts/release/                @org/security-team @org/devops-team
+
+# Database scripts
+scripts/db/                     @org/security-team @org/database-admin
+scripts/migration/              @org/security-team @org/database-admin
+
+# Security scripts
+scripts/security/               @org/security-team
+
+# ============================================================================
+# LEGAL & COMPLIANCE
+# ============================================================================
+
+LICENSE                         @org/legal-team
+TERMS.md                        @org/legal-team
+PRIVACY.md                      @org/legal-team @org/security-team
+
+# ============================================================================
+# MONOREPO STRUCTURE (if applicable)
+# ============================================================================
+
+# apps/web/                       @org/frontend-team
+# apps/api/                       @org/backend-team
+# apps/admin/                     @org/backend-team @org/security-team
+# packages/shared/                @org/backend-team @org/frontend-team
+# packages/ui/                    @org/frontend-team
+
+# ============================================================================
+# EXAMPLES & TEMPLATES
+# ============================================================================
+# These might not need strict review but should have oversight
+
+# examples/                       @org/devops-team
+# templates/                      @org/devops-team
+
+# ============================================================================
+# NOTES
+# ============================================================================
+# 
+# Best Practices:
+# 1. Be as specific as possible with paths
+# 2. Order matters - last matching rule takes precedence
+# 3. Use teams (@org/team-name) rather than individuals when possible
+# 4. Review and update quarterly
+# 5. Test with: gh api repos/:owner/:repo/collaborators/:username/permission
+# 
+# Team Setup:
+# 1. Create teams in GitHub Organization Settings
+# 2. Add team members
+# 3. Grant appropriate repository access levels
+# 4. Update this file to reference teams
+# 
+# Enforcement:
+# - Enable "Require review from Code Owners" in branch protection
+# - Set minimum number of approvals required
+# - Consider "Dismiss stale pull request approvals"
+# 
+# ============================================================================
