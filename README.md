@@ -1,533 +1,427 @@
-# 🔒 LLM Security Framework - Complete Package
+# 🔒 LLM Security Framework v3.0
 
-**Version 2.0 | Production Ready**  
-**Created**: November 14, 2025
+**Comprehensive Security Guide for AI-Assisted Development**
 
----
-
-## 📦 What's Included
-
-This package contains everything you need to secure your AI-assisted development workflow with Claude Code, Cursor, GitHub, Netlify, and Supabase.
-
-### 1. **LLM-Security-Guidelines.md** (50KB) ⭐ PRIMARY DOCUMENT
-**Purpose**: Comprehensive security framework  
-**Audience**: All developers, security team  
-**Use case**: Complete reference guide
-
-**Contents**:
-- 17 major security sections
-- Tool-specific configurations (Cursor, Claude Code, Supabase, Netlify, GitHub)
-- Incident response procedures
-- Code examples and scripts
-- Compliance requirements
-- Risk classification system
-- 200+ security controls
-
-**When to use**: 
-- First read for all team members
-- Reference during development
-- Security audits
-- Onboarding new developers
+**Stack**: Cursor, Claude Code, GitHub, Netlify, Supabase  
+**Target**: Solo Developers → Startups (5-20) → Production Apps with PII/Payments  
+**Compliance**: GDPR, NIS2, DORA, AI Act (EU Focus)  
+**Last Updated**: November 15, 2025
 
 ---
 
-### 2. **Security-Quick-Reference.md** (5KB) ⭐ DAILY USE
-**Purpose**: One-page cheat sheet  
-**Audience**: All developers  
-**Use case**: Keep at your desk, check daily
+## ⚠️ Framework v3.0 - What Changed?
 
-**Contents**:
-- Pre-flight checklist for AI interactions
-- Critical "never do" list
-- Emergency response steps
-- Quick security commands
-- Secret leak procedures
-- Risk level reference
-- Emergency contacts template
+**CRITICAL**: This is a complete rebuild based on 2025 security research and fact-checking.
 
-**When to use**:
-- Every morning before starting work
-- Before committing code
-- Before asking AI for help
-- During incidents
+**Major Corrections from v2.0:**
+- ✅ Fixed dangerous `.cursorignore` misconceptions (it's best-effort, not a security boundary)
+- ✅ Corrected Supabase RLS defaults (nuanced by table creation method)
+- ✅ Added Claude Code .env protection requirements (not protected by default)
+- ✅ Documented all 2025 CVEs (5 confirmed vulnerabilities with patch versions)
+- ✅ Added GTG-1002 attack documentation (first AI-orchestrated cyber espionage)
+- ✅ Clarified Netlify security headers (manual configuration required)
+- ✅ Added package hallucination protections ("slopsquatting" attacks)
+- ✅ Included MCP security risks (5 official threat categories)
+- ✅ Mapped EU compliance requirements (GDPR/NIS2/DORA/AI Act)
 
-**💡 TIP**: Print this and keep it visible at your desk!
+**See**: [SECURITY-AUDIT-CRITICAL.md](SECURITY-AUDIT-CRITICAL.md) for complete gap analysis.
 
 ---
 
-### 3. **security-setup.sh** (14KB) ⭐ ONE-TIME SETUP
-**Purpose**: Automated security configuration  
-**Audience**: DevOps, team leads, developers  
-**Use case**: Initial repository setup
+## 🎯 Choose Your Security Tier
 
-**What it does**:
-- ✅ Installs Gitleaks (secret scanner)
-- ✅ Creates .cursorignore
-- ✅ Configures .gitignore
-- ✅ Sets up Git pre-commit hooks
-- ✅ Sets up Git pre-push hooks
-- ✅ Creates security scripts
-- ✅ Creates GitHub Actions workflows
-- ✅ Generates SECURITY.md
-- ✅ Runs initial security scan
+### 🟢 **Tier Essential** (15 minutes)
+**Perfect for**: Hobby projects, MVPs, learning, side projects, non-production code
 
-**How to use**:
-```bash
-# 1. Navigate to your repository root
-cd /path/to/your/repo
+**You get**:
+- ✅ Basic secret scanning (Gitleaks)
+- ✅ Pre-commit hooks
+- ✅ .cursorignore and .gitignore templates
+- ✅ Environment variable templates
+- ✅ Daily security checklist
 
-# 2. Copy this script to your repo
-cp security-setup.sh /path/to/your/repo/
+**You DON'T get**:
+- ❌ Protection against MCP attacks
+- ❌ Package hallucination verification
+- ❌ Advanced monitoring
+- ❌ Compliance documentation
 
-# 3. Make it executable
-chmod +x security-setup.sh
+**⚠️ NOT suitable for**: Production apps, customer data, payments, PII
 
-# 4. Run it
-./security-setup.sh
-
-# 5. Follow the post-setup instructions
-```
-
-**Time**: ~5 minutes  
-**Prerequisites**: Git repository, macOS/Linux, npm installed
+**👉 START HERE**: [Quick Start Guide](docs/tier-essential/QUICK-START.md)
 
 ---
 
-### 4. **GitHub-Security-Configuration.md** (16KB) ⭐ GITHUB SETUP
-**Purpose**: Complete GitHub organization hardening guide  
-**Audience**: DevOps, organization admins, security team  
-**Use case**: GitHub configuration and maintenance
+### 🟡 **Tier Standard** (2-4 hours)
+**Perfect for**: Production SaaS, startups, customer-facing apps, team projects
 
-**Contents**:
-- Organization-level security settings
-- Branch protection rules (copy-paste ready)
-- CODEOWNERS file template
-- GitHub Actions security workflows
-- Secret scanning configuration
-- Dependabot configuration
-- Audit logging setup
-- Monthly security review checklist
+**You get everything from Essential PLUS**:
+- ✅ Tool-specific security (Cursor CVEs, Claude Code sandboxing, etc.)
+- ✅ Supabase RLS policies (correct defaults)
+- ✅ GitHub Advanced Security setup
+- ✅ Netlify security headers (manual config)
+- ✅ Package verification procedures
+- ✅ MCP server vetting checklist
+- ✅ Monitoring and alerting
+- ✅ Team security policies
 
-**When to use**:
-- Setting up new GitHub organization
-- Hardening existing repositories
-- Monthly security reviews
-- After security incidents
+**You DON'T get**:
+- ❌ Full EU compliance documentation
+- ❌ Audit logging procedures
+- ❌ Incident response templates
+- ❌ Regulatory reporting procedures
 
----
+**⚠️ NOT suitable for**: Healthcare data, financial services, critical infrastructure, strict regulatory requirements
 
-## 🚀 Quick Start Guide
-
-### For New Projects
-
-**Step 1**: Read the basics (15 minutes)
-```
-□ Read Security-Quick-Reference.md
-□ Skim LLM-Security-Guidelines.md sections 1-6
-```
-
-**Step 2**: Run automated setup (5 minutes)
-```bash
-cd your-project
-./security-setup.sh
-```
-
-**Step 3**: Configure GitHub (30 minutes)
-```
-□ Follow GitHub-Security-Configuration.md
-□ Enable GitHub Advanced Security
-□ Set up branch protection
-□ Create CODEOWNERS file
-```
-
-**Step 4**: Team onboarding (ongoing)
-```
-□ Share Security-Quick-Reference.md with team
-□ Schedule security training
-□ Add to onboarding checklist
-```
+**👉 START HERE**: [Full Implementation Guide](docs/tier-standard/FULL-IMPLEMENTATION.md)
 
 ---
 
-### For Existing Projects
+### 🔴 **Tier Hardened** (1-2 weeks)
+**Perfect for**: PII/payments, regulated industries, healthcare, fintech, critical infrastructure
 
-**Phase 1: Assessment** (1 hour)
-```bash
-# Run security scan
-gitleaks detect --source . --verbose
+**You get everything from Standard PLUS**:
+- ✅ GDPR Article-by-Article compliance mapping
+- ✅ NIS2 Directive implementation (for applicable entities)
+- ✅ DORA requirements (financial sector)
+- ✅ AI Act transparency obligations
+- ✅ Comprehensive audit logging
+- ✅ Incident response playbooks
+- ✅ CVE tracking and patch management
+- ✅ Vendor risk assessment (Anthropic/OpenAI as processors)
+- ✅ Data protection impact assessments (DPIA)
+- ✅ Breach notification procedures (72-hour timeline)
 
-# Check for exposed secrets
-git log --all -p | grep -i "api_key\|secret\|password"
+**This tier IS suitable for**: Everything, with full regulatory compliance
 
-# Audit dependencies
-npm audit
-```
-
-**Phase 2: Remediation** (2-4 hours)
-```bash
-# Run setup script
-./security-setup.sh
-
-# Clean history if secrets found
-# (Follow LLM-Security-Guidelines.md Section 10)
-
-# Rotate all potentially compromised keys
-```
-
-**Phase 3: Hardening** (2-3 hours)
-```
-□ Configure GitHub per GitHub-Security-Configuration.md
-□ Set up Supabase RLS (LLM-Security-Guidelines.md Section 4)
-□ Configure Netlify security (LLM-Security-Guidelines.md Section 5)
-□ Train team on Security-Quick-Reference.md
-```
+**👉 START HERE**: [EU Compliance Guide](docs/tier-hardened/EU-COMPLIANCE.md)
 
 ---
 
-## 📚 Document Hierarchy
+## 🔧 Already Have a Project?
+
+**Don't start from scratch** - retrofit security into your existing codebase.
+
+**Assessment takes 30 minutes**:
+- 🔍 Scan for secrets in Git history
+- 🔍 Check dependency vulnerabilities
+- 🔍 Verify RLS policies
+- 🔍 Audit environment variables
+- 🔍 Score your current security posture
+
+**👉 START HERE**: [Retrofitting Assessment](docs/retrofitting/ASSESSMENT.md)
+
+---
+
+## 📚 Core Documentation
+
+### Foundation (Read These First)
+- [**Security Tiers Explained**](docs/SECURITY-TIERS.md) - Understand Essential vs Standard vs Hardened
+- [**Threat Model**](docs/THREAT-MODEL.md) - AI-specific attack surface and risks
+- [**Security Audit Report**](SECURITY-AUDIT-CRITICAL.md) - What was wrong with v2.0
+
+### Reference Materials
+- [**CVE Database**](docs/reference/CVE-DATABASE.md) - All 2025 vulnerabilities with patches
+- [**GTG-1002 Attack Analysis**](docs/reference/GTG-1002-ATTACK.md) - First AI-orchestrated attack
+- [**MCP Security Guide**](docs/reference/MCP-SECURITY.md) - Model Context Protocol risks
+- [**Package Hallucination**](docs/reference/PACKAGE-HALLUCINATION.md) - Slopsquatting defenses
+
+---
+
+## 🚨 Quick Links for Emergencies
+
+### Secret Leaked in Git?
+**→ [Secret Leak Response](docs/tier-standard/INCIDENT-RESPONSE.md#secret-leak)**  
+**→ Script**: `scripts/security/secret-leak-response.sh`
+
+### Suspicious AI Behavior?
+**→ [Prompt Injection Defense](docs/tier-standard/CURSOR-SECURITY.md#prompt-injection)**  
+**→ [GTG-1002 Attack Patterns](docs/reference/GTG-1002-ATTACK.md)**
+
+### Compliance Breach?
+**→ [GDPR Breach Response](docs/tier-hardened/GDPR-TECHNICAL-MEASURES.md#breach-notification)**  
+**→ [NIS2 Incident Reporting](docs/tier-hardened/NIS2-REQUIREMENTS.md#incident-reporting)**
+
+### CVE in Your Tools?
+**→ [Check Versions](docs/reference/CVE-DATABASE.md#minimum-safe-versions)**  
+**→ Cursor minimum: v1.7+**  
+**→ Claude Code minimum: v1.0.24+**
+
+---
+
+## 📊 What's Inside This Framework?
 
 ```
-Usage Frequency:
-├── Daily
-│   └── Security-Quick-Reference.md
+llm-security-framework/
 │
-├── Weekly
-│   └── LLM-Security-Guidelines.md (Sections 1-7, 11-13)
+├── README.md ⭐ YOU ARE HERE
+├── SECURITY-AUDIT-CRITICAL.md (v2.0 gap analysis)
+├── IMPLEMENTATION-ROADMAP.md (6-session rebuild plan)
+├── CHANGELOG.md
+├── LICENSE
 │
-├── One-time Setup
-│   ├── security-setup.sh
-│   └── GitHub-Security-Configuration.md
+├── docs/
+│   ├── SECURITY-TIERS.md ⭐ FOUNDATION
+│   ├── THREAT-MODEL.md ⭐ FOUNDATION
+│   │
+│   ├── tier-essential/ 📁 (15-min security)
+│   │   ├── QUICK-START.md
+│   │   ├── DAILY-CHECKLIST.md
+│   │   └── configs/ (copy-paste templates)
+│   │
+│   ├── tier-standard/ 📁 (Production ready)
+│   │   ├── FULL-IMPLEMENTATION.md
+│   │   ├── CURSOR-SECURITY.md (with CVE warnings)
+│   │   ├── CLAUDE-CODE-SECURITY.md (with .env protection)
+│   │   ├── SUPABASE-SECURITY.md (correct RLS defaults)
+│   │   ├── NETLIFY-SECURITY.md (manual headers)
+│   │   ├── GITHUB-SECURITY.md
+│   │   ├── PACKAGE-VERIFICATION.md
+│   │   └── MONITORING.md
+│   │
+│   ├── tier-hardened/ 📁 (Full compliance)
+│   │   ├── EU-COMPLIANCE.md
+│   │   ├── GDPR-TECHNICAL-MEASURES.md
+│   │   ├── NIS2-REQUIREMENTS.md
+│   │   ├── DORA-CHECKLIST.md
+│   │   ├── AI-ACT-TRANSPARENCY.md
+│   │   ├── AUDIT-LOGGING.md
+│   │   └── INCIDENT-RESPONSE.md
+│   │
+│   ├── retrofitting/ 📁
+│   │   ├── ASSESSMENT.md
+│   │   ├── REMEDIATION-PLAN.md
+│   │   └── SECRET-CLEANUP.md
+│   │
+│   └── reference/
+│       ├── CVE-DATABASE.md (2025 vulnerabilities)
+│       ├── GTG-1002-ATTACK.md
+│       ├── MCP-SECURITY.md
+│       └── PACKAGE-HALLUCINATION.md
 │
-└── Reference/Incident Response
-    └── LLM-Security-Guidelines.md (Sections 8-10, 14-17)
+├── templates/ (all configs fact-checked)
+├── scripts/ (automation with 2025 fixes)
+└── examples/ (real-world scenarios)
 ```
 
 ---
 
-## 🎯 Role-Based Reading Guide
+## 🎓 Who Is This For?
 
-### **Developers** (Individual Contributors)
-**Must Read**:
-- ✅ Security-Quick-Reference.md (entire document)
-- ✅ LLM-Security-Guidelines.md (Sections 1, 2, 6, 11)
+### ✅ Perfect For:
+- **Solo indie developers** building SaaS with AI assistance
+- **Startup teams (5-20 people)** using Cursor/Claude Code
+- **Product teams** adopting AI coding tools
+- **Security teams** implementing AI tool governance
+- **Compliance officers** ensuring regulatory adherence
 
-**Should Read**:
-- 📖 LLM-Security-Guidelines.md (Sections 3, 4, 5, 7, 12)
-
-**Reference**:
-- 📚 LLM-Security-Guidelines.md (Sections 8, 9, 10)
-
----
-
-### **Team Leads / Engineering Managers**
-**Must Read**:
-- ✅ All documents in entirety
-- ✅ LLM-Security-Guidelines.md (Sections 13, 14, 15)
-
-**Action Items**:
-- ✅ Run security-setup.sh on all repositories
-- ✅ Configure GitHub per GitHub-Security-Configuration.md
-- ✅ Schedule monthly security reviews
-- ✅ Assign security champions
+### ❌ Not Designed For:
+- Large enterprises (100+ devs) - you need more sophisticated tooling
+- Non-European compliance (HIPAA, SOC2, etc.) - we focus on EU
+- Custom/proprietary AI tools - we cover Cursor, Claude Code, standard tools
+- Air-gapped/offline environments - assumes cloud-based development
 
 ---
 
-### **Security Team**
-**Must Read**:
-- ✅ LLM-Security-Guidelines.md (complete)
-- ✅ GitHub-Security-Configuration.md (complete)
+## ⚖️ EU Regulatory Compliance
 
-**Ownership**:
-- ✅ Incident response (Section 10)
-- ✅ Audit logging (Section 9)
-- ✅ Compliance (Section 14)
-- ✅ Monthly reviews (Section 13)
+This framework helps you comply with:
 
----
+### GDPR (General Data Protection Regulation)
+**Applies to**: ALL businesses handling EU resident data
 
-### **DevOps / Platform Engineers**
-**Must Read**:
-- ✅ security-setup.sh (understand what it does)
-- ✅ GitHub-Security-Configuration.md (complete)
-- ✅ LLM-Security-Guidelines.md (Sections 3, 5, 8, 12)
+**We cover**:
+- Article 25: Data protection by design and by default
+- Article 32: Security of processing (appropriate technical measures)
+- Article 33: Breach notification (72-hour requirement)
+- Article 35: Data Protection Impact Assessment
 
-**Action Items**:
-- ✅ Implement CI/CD security scans
-- ✅ Configure organization-level GitHub settings
-- ✅ Set up monitoring and alerting
-- ✅ Maintain secret rotation schedule
+**👉 Guide**: [GDPR Technical Measures](docs/tier-hardened/GDPR-TECHNICAL-MEASURES.md)
 
 ---
 
-## ⚠️ Critical Implementation Priorities
+### NIS2 (Network and Information Security Directive)
+**Applies to**: Medium+ enterprises (50+ employees OR €10M+ revenue) in 18 critical sectors
 
-### 🔴 **CRITICAL** (Do within 24 hours)
-1. Run `security-setup.sh` on all repositories
-2. Enable GitHub secret scanning with push protection
-3. Scan all repositories for existing secrets
-4. Rotate any exposed credentials
-5. Enable Supabase RLS on all tables
+**Transposition deadline**: October 17, 2024 (14/27 member states compliant as of Nov 2025)
 
-### 🟠 **HIGH** (Do within 1 week)
-1. Configure branch protection rules
-2. Create CODEOWNERS file
-3. Set up GitHub Actions security workflows
-4. Configure Dependabot
-5. Train all developers on Security-Quick-Reference.md
+**We cover**:
+- Article 21: Cybersecurity risk management measures
+- Article 23: Incident reporting (24/72 hour timeline)
+- Applicability assessment
+- Technical implementation guidance
 
-### 🟡 **MEDIUM** (Do within 1 month)
-1. Complete team security training
-2. Implement audit logging
-3. Set up monitoring and alerting
-4. Document incident response procedures
-5. Schedule monthly security reviews
+**👉 Guide**: [NIS2 Requirements](docs/tier-hardened/NIS2-REQUIREMENTS.md)
+
+**Source**: Directive (EU) 2022/2555, ENISA Technical Guidance (June 2025)
 
 ---
 
-## 🆘 Emergency Quick Links
+### DORA (Digital Operational Resilience Act)
+**Applies to**: Financial sector entities ONLY
 
-### 🚨 Secret Leaked in Git
-**→ LLM-Security-Guidelines.md, Section 10**  
-**→ security-setup.sh creates:** `scripts/security/secret-leak-response.sh`
+**Effective**: January 2025
 
-### ⚠️ Suspected Prompt Injection
-**→ LLM-Security-Guidelines.md, Section 10**  
-**→ Security-Quick-Reference.md, "SUSPICIOUS AI BEHAVIOR"**
+**We cover**:
+- Article 28: ICT third-party risk management
+- Article 30: Sub-outsourcing (AI providers as sub-processors)
+- Testing requirements
 
-### 🔍 How Do I...?
-| Question | Answer Location |
-|----------|----------------|
-| Configure Cursor safely? | LLM-Security-Guidelines.md, Section 1 |
-| Use Claude Code securely? | LLM-Security-Guidelines.md, Section 2 |
-| Set up Supabase RLS? | LLM-Security-Guidelines.md, Section 4 |
-| Configure Netlify security? | LLM-Security-Guidelines.md, Section 5 |
-| Verify a package before installing? | LLM-Security-Guidelines.md, Section 7 |
-| Respond to an incident? | LLM-Security-Guidelines.md, Section 10 |
-| Review AI-generated code? | LLM-Security-Guidelines.md, Section 11 |
+**👉 Guide**: [DORA Checklist](docs/tier-hardened/DORA-CHECKLIST.md)
 
 ---
 
-## 📊 Metrics & Success Criteria
+### AI Act (Artificial Intelligence Act)
+**Applies to**: Users of general-purpose AI systems
 
-Track these metrics monthly:
+**Phased implementation**: Starting 2025
 
-```yaml
-Prevention Metrics:
-  - Secrets detected by pre-commit hooks: (target: <5/month)
-  - Commits blocked by push protection: (tracked automatically)
-  - Vulnerabilities in dependencies: (target: 0 critical)
-  - Time to patch critical CVEs: (target: <48 hours)
+**We cover**:
+- Article 52: Transparency obligations (users must know they're interacting with AI)
+- High-risk AI system assessment
+- General-purpose AI requirements
 
-Detection Metrics:
-  - Mean time to detect security issue: (target: <1 hour)
-  - False positive rate: (target: <10%)
-  - Secret scanning alerts: (target: 0 open)
-  
-Response Metrics:
-  - Mean time to respond to incidents: (target: <30 minutes)
-  - Mean time to remediate: (target: <4 hours)
-  - Incident retrospectives completed: (target: 100%)
+**👉 Guide**: [AI Act Transparency](docs/tier-hardened/AI-ACT-TRANSPARENCY.md)
 
-Training Metrics:
-  - Developers trained: (target: 100%)
-  - Security awareness test pass rate: (target: >90%)
+---
+
+## 🔍 Framework Verification Status
+
+**Last Fact-Checked**: November 15, 2025
+
+**Primary Sources**:
+- ✅ EU Official Journal (GDPR, NIS2, DORA, AI Act)
+- ✅ ENISA Technical Guidance (NIS2, June 2025)
+- ✅ National Vulnerability Database (CVE verification)
+- ✅ GitHub Security Advisories (Cursor, Claude Code)
+- ✅ Anthropic Official Documentation (Claude Code, GTG-1002)
+- ✅ Cursor Official Documentation
+- ✅ Supabase Official Documentation
+- ✅ Netlify Official Documentation
+
+**Next Review**: February 15, 2026 (quarterly updates)
+
+**CVE Verification**:
+- All CVE-2025-XXXXX numbers verified via NVD, NSFOCUS, Tenable
+- Patch versions verified via GitHub Security Advisories
+- Disclosure dates confirmed via security research firms
+
+**Compliance Verification**:
+- NIS2 status verified via ENISA.europa.eu (November 2025)
+- GDPR Article citations verified via EUR-Lex
+- DORA requirements verified via EU Official Journal
+- AI Act provisions verified via EU Commission documentation
+
+---
+
+## 🚀 Getting Started (5 Minutes)
+
+### Step 1: Determine Your Tier (2 min)
+
+Answer these questions:
+
+1. **Do you handle customer data?**
+   - No → Essential
+   - Yes → Continue...
+
+2. **Is it in production with real users?**
+   - No → Essential
+   - Yes → Continue...
+
+3. **Do you handle PII, payments, or health data?**
+   - No → Standard
+   - Yes → Hardened
+
+4. **Are you in a regulated industry (finance, healthcare)?**
+   - No → Standard
+   - Yes → Hardened
+
+5. **Do you have 50+ employees OR €10M+ revenue in EU critical sectors?**
+   - No → Standard (unless you handle sensitive data)
+   - Yes → Hardened (NIS2 likely applies)
+
+**👉 Still unsure?** Read [SECURITY-TIERS.md](docs/SECURITY-TIERS.md)
+
+---
+
+### Step 2: Follow Your Tier's Quick Start (3 min)
+
+**Essential**: [Quick Start](docs/tier-essential/QUICK-START.md) - 15 minutes to basic security
+
+**Standard**: [Full Implementation](docs/tier-standard/FULL-IMPLEMENTATION.md) - 2-4 hours to production-ready
+
+**Hardened**: [EU Compliance](docs/tier-hardened/EU-COMPLIANCE.md) - 1-2 weeks to full compliance
+
+---
+
+### Step 3: Set Up Daily Habits
+
+**Every morning before coding**:
+```bash
+./scripts/security/daily-check.sh
 ```
 
----
+**Before every commit**:
+```bash
+# Automatic via pre-commit hook (installed in setup)
+git commit -m "your message"
+```
 
-## 🔄 Maintenance Schedule
-
-### Daily
-- Individual developers run: `./scripts/security/daily-check.sh`
-
-### Weekly
+**Weekly** (Mondays):
 - Review Dependabot PRs
 - Check secret scanning alerts
 - Review open security issues
 
-### Monthly
-- Security team review meeting
-- Update threat model
-- Rotate credentials
+**Monthly**:
+- Rotate credentials (90-day policy)
 - Review access logs
-- Update documentation
-
-### Quarterly
-- Full security audit
-- Penetration testing
-- Team training refresh
-- Tool updates
-
-### Annually
-- Complete security posture review
-- Update compliance documentation
-- Third-party security assessment
+- Update threat model
+- Team security training
 
 ---
 
-## 🛠️ Customization Guide
+## 🆘 Support & Questions
 
-### Adapting for Your Organization
+### Internal Resources
+- **Security Team**: security@yourcompany.com
+- **Slack**: #security-alerts (incidents), #security-general (questions)
 
-**Replace these placeholders throughout documents**:
+### External Resources
+- **Anthropic Security**: https://docs.anthropic.com/security
+- **Cursor Security**: https://github.com/cursor/cursor/security
+- **Supabase Security**: https://supabase.com/docs/guides/platform/security
+- **Netlify Security**: https://docs.netlify.com/security/
+- **ENISA NIS2 Guidance**: https://www.enisa.europa.eu/publications/nis2-technical-implementation-guidance
 
-```
-@org/security-team → your-actual-security-team
-@org/backend-team → your-actual-backend-team
-@org/devops-team → your-actual-devops-team
-security@yourcompany.com → your-actual-security-email
-#security-alerts → your-actual-slack-channel
-```
+### Contributing
+Found a gap? Security issue? Want to improve something?
 
-**Adjust risk levels** based on your:
-- Industry regulations (healthcare, finance, etc.)
-- Data sensitivity
-- Threat model
-- Compliance requirements
-
-**Add sections for**:
-- Your specific cloud providers
-- Internal tools not covered
-- Company-specific policies
-- Industry-specific requirements
+1. **Security vulnerabilities**: Email security@yourcompany.com (don't create public issues)
+2. **Improvements**: Create GitHub issue or PR
+3. **Questions**: Use GitHub Discussions
 
 ---
 
 ## 📝 Version History
 
-| Version | Date | Major Changes |
-|---------|------|---------------|
-| 1.0 | 2025-11 | Initial German version (user-created) |
-| 2.0 | 2025-11-14 | Production-ready English expansion with:<br>• 17 comprehensive sections<br>• Tool-specific configs<br>• Incident response procedures<br>• Setup automation<br>• GitHub hardening guide |
+| Version | Date | Changes |
+|---------|------|---------|
+| 3.0 | 2025-11-15 | Complete rebuild with 2025 fact-checking, EU compliance, CVE documentation |
+| 2.0 | 2025-11-14 | Production-ready expansion (contained critical inaccuracies - see audit) |
+| 1.0 | 2025-11 | Initial German version |
 
 ---
 
-## 🤝 Contributing
+## 📜 License
 
-This is a living document. To improve:
-
-1. **Found a security gap?** 
-   - Email: security@yourcompany.com
-   - Don't create public issues for vulnerabilities
-
-2. **Have a suggestion?**
-   - Create an issue or PR
-   - Include rationale and examples
-
-3. **After an incident**:
-   - Update relevant sections
-   - Add lessons learned
-   - Update response procedures
+Apache 2.0 - See [LICENSE](LICENSE)
 
 ---
 
-## 📞 Support & Questions
+## ⚡ One-Line Summary
 
-### Internal
-- **Security Team**: security@yourcompany.com
-- **Slack**: #security-alerts (incidents), #security-general (questions)
-- **Wiki**: [Link to internal security wiki]
-
-### External Resources
-- **Anthropic Security**: https://docs.anthropic.com/security
-- **Supabase Security**: https://supabase.com/docs/guides/platform/security
-- **GitHub Security**: https://docs.github.com/en/code-security
-- **Netlify Security**: https://docs.netlify.com/security/
-- **OWASP**: https://owasp.org/www-project-top-ten/
+**Fact-checked, tiered security framework for AI-assisted development with Cursor and Claude Code, covering hobby projects through full EU regulatory compliance.**
 
 ---
 
-## ✅ Implementation Checklist
-
-Use this to track your security framework implementation:
-
-### Setup Phase
-```
-□ Read all documents
-□ Run security-setup.sh on all repositories
-□ Configure GitHub organization settings
-□ Enable GitHub Advanced Security
-□ Set up branch protection rules
-□ Create CODEOWNERS files
-□ Configure Dependabot
-□ Set up CI/CD security scans
-```
-
-### Training Phase
-```
-□ Train all developers on Security-Quick-Reference
-□ Conduct security awareness session
-□ Distribute documentation to team
-□ Assign security champions
-□ Create onboarding checklist
-```
-
-### Operational Phase
-```
-□ Daily security checks running
-□ Weekly Dependabot review process
-□ Monthly security review meetings
-□ Incident response tested
-□ Metrics tracking implemented
-□ Audit logging enabled
-```
-
-### Verification Phase
-```
-□ All repositories scanned
-□ No secrets in Git history
-□ All keys rotated
-□ RLS enabled on all Supabase tables
-□ Team trained and certified
-□ Documentation customized for org
-```
-
----
-
-## 🎓 Training Resources
-
-Included in this package:
-- ✅ Security-Quick-Reference.md (printable cheat sheet)
-- ✅ LLM-Security-Guidelines.md (comprehensive manual)
-- ✅ GitHub-Security-Configuration.md (hands-on guide)
-- ✅ security-setup.sh (automated implementation)
-
-Recommended external training:
-- OWASP Top 10 course
-- GitHub Security certification
-- Supabase security best practices
-- AI security fundamentals
-
----
-
-## 🏁 Next Steps
-
-**Right Now** (5 minutes):
-1. Read Security-Quick-Reference.md
-2. Print it and put it at your desk
-3. Check if Gitleaks is installed: `gitleaks version`
-
-**Today** (1 hour):
-1. Run security-setup.sh on your main repository
-2. Fix any secrets it finds
-3. Share Security-Quick-Reference.md with your team
-
-**This Week** (3-4 hours):
-1. Read LLM-Security-Guidelines.md sections 1-7
-2. Configure GitHub per GitHub-Security-Configuration.md
-3. Schedule team security training session
-
-**This Month**:
-1. Complete full security framework implementation
-2. Train all team members
-3. Schedule first monthly security review
-
----
-
-**Remember**: Security is not a one-time setup—it's a continuous practice. Start small, be consistent, and improve iteratively.
-
----
-
-*Package created: November 14, 2025*  
-*Framework version: 2.0*  
-*Maintained by: Security Team*
+**👉 Ready? Pick your tier above and get started! ⬆️**
