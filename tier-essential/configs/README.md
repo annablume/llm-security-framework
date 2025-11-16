@@ -127,6 +127,55 @@ rm test.txt
 
 ---
 
+## 🔍 Handling Template Files in Secret Scanning
+
+### The Challenge
+
+Template files like `.env.example.template` contain example values that look like real secrets:
+- Example JWTs: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+- Example API keys: `sk-proj-xxxxxxxxxxxx`
+- Example UUIDs: `xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
+
+These trigger false positives in secret scanning tools.
+
+### The Solution
+
+The framework's pre-push hook automatically excludes:
+```bash
+tier-essential/configs/   # All framework templates
+examples/                 # Documentation examples
+*.template               # Any .template files
+*.example               # Any .example files
+```
+
+### For Your Projects
+
+When you copy templates to your projects, the example values are safe because:
+
+1. **Templates are documentation** - They show the format, not real secrets
+2. **Real files are protected** - Your actual `.env` is in `.gitignore`
+3. **Scanning still works** - Real code is still scanned
+
+### Creating Your Own Templates
+
+If you create custom template files:
+
+```bash
+# Add your template directory to the exclusion list
+# Edit .git/hooks/pre-push and add:
+# | grep -v "your-templates-directory/"
+```
+
+### Why This Approach
+
+We chose directory-based exclusion over `.gitleaksignore` because:
+- ✅ More reliable across gitleaks versions
+- ✅ Explicit and visible in the hook
+- ✅ Easy to customize per project
+- ✅ No dependency on gitleaks config format
+
+---
+
 ## 🆘 Troubleshooting
 
 See [QUICK-START.md](../QUICK-START.md#troubleshooting) for common issues.

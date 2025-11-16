@@ -213,6 +213,32 @@ gitleaks version
 git commit --no-verify -m "your message"
 ```
 
+### "Gitleaks Blocks Commits with Template Files"
+
+**Problem**: Pre-push hook flags example values in `.env.example.template` or other template files
+
+**Cause**: Template files contain example JWTs and API keys that look like real secrets
+
+**Solution**: This is already handled! The pre-push hook automatically excludes:
+- `tier-essential/configs/` (framework templates)
+- `*.template` and `*.example` files
+- `examples/` directory
+
+**If you create your own template files**, you may need to add them to the exclusion list in `.git/hooks/pre-push`:
+
+```bash
+# Edit your project's pre-push hook
+nano .git/hooks/pre-push
+
+# Find the filtering section and add your directory:
+# | grep -v "your-custom-templates/"
+```
+
+**Why this is safe**: 
+- Template files have example values only
+- Real `.env` files are blocked by `.gitignore`
+- Actual code is still scanned for secrets
+
 ---
 
 **👉 Next: [DAILY-CHECKLIST.md](DAILY-CHECKLIST.md)**

@@ -13,6 +13,32 @@ Tier Essential provides **basic security hygiene**:
 ✅ File exclusion templates (best-effort)  
 ✅ Daily security checklist  
 ✅ Environment variable templates  
+✅ Smart template file handling  
+
+### Smart Template Handling
+
+**Protection Level**: Intelligent ✅
+
+**What It Does**:
+- Pre-push hook excludes template directories from secret scanning
+- Prevents false positives from example values
+- Still scans all actual code
+
+**Example**:
+```bash
+# This will be flagged ❌
+# In src/config.js:
+const apiKey = "sk-proj-realkey123456789"
+
+# This won't be flagged ✅
+# In tier-essential/configs/.env.example.template:
+OPENAI_API_KEY=sk-proj-xxxxxxxxxxxx  # Example value
+```
+
+**Why It's Safe**:
+- Template files are documentation only
+- Real secrets go in `.env` (which is blocked by `.gitignore`)
+- Actual code is still fully scanned
 
 ---
 
