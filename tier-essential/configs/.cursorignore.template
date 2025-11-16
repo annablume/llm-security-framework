@@ -1,0 +1,66 @@
+# LLM Security - Sensitive Files
+# Version 2.0
+
+# Environment & Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+secrets/
+credentials/
+
+# Cloud Provider Configs
+.aws/
+.gcloud/
+.azure/
+
+# Database & Service Configs
+supabase/.env
+netlify.toml
+docker-compose.override.yml
+
+# Package Manager (if contains tokens)
+.npmrc
+.yarnrc.yml
+.pip/
+poetry.toml
+
+# Build Artifacts
+dist/
+build/
+.next/
+.nuxt/
+out/
+coverage/
+
+# Logs (may contain sensitive data)
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Testing with real data
+tests/fixtures/real-data/
+cypress/fixtures/production/
+
+# Documentation with architecture details
+docs/infrastructure/
+docs/architecture/sensitive/
+
+# Git
+.git/
+
+# Security-sensitive scripts (bypass security controls)
+scripts/push-to-all.sh
+
+# Dependencies
+node_modules/

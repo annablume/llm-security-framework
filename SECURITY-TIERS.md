@@ -104,7 +104,7 @@ This framework provides **three security tiers** designed for different project 
 
 **Time**: 15 minutes
 
-**Guide**: [Quick Start](tier-essential/QUICK-START.md)
+**Guide**: [Quick Start](../tier-essential/QUICK-START.md)
 
 ---
 
@@ -269,7 +269,7 @@ When you get your first real user, switch to Standard tier immediately.
 
 **Time**: 2-4 hours over 1-2 days
 
-**Guide**: [Full Implementation](tier-standard/FULL-IMPLEMENTATION.md)
+**Guide**: [Full Implementation](../tier-standard/FULL-IMPLEMENTATION.md) *(Coming in Session 3)*
 
 ---
 
@@ -495,7 +495,7 @@ When you handle sensitive data, enter regulated industries, or face regulatory r
 
 **Time**: 1-2 weeks (experienced team) or 3-4 weeks (first time)
 
-**Guide**: [EU Compliance](tier-hardened/EU-COMPLIANCE.md)
+**Guide**: [EU Compliance](../tier-hardened/EU-COMPLIANCE.md) *(Coming in Session 4)*
 
 ---
 
