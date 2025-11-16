@@ -1,0 +1,26 @@
+# LLM Security Framework v3.0 - Gitleaks Ignore Rules
+# This file tells Gitleaks to skip scanning certain files that contain
+# intentional example values that look like secrets but aren't.
+
+# Template files with example values
+tier-essential/configs/.env.example.template
+tier-essential/configs/.cursorignore.template
+tier-essential/configs/.gitignore.template
+
+# Example files in the repository
+examples/
+docs/examples/
+
+# Documentation files with example values (be selective - only if they contain example secrets)
+# Uncomment if needed:
+# **/README.md
+# **/QUICK-START.md
+
+# Pattern: Any file ending in .example or .template
+*.example
+*.template
+
+# Test fixtures (if you add tests in SESSION 5)
+tests/fixtures/
+test/fixtures/
+__tests__/fixtures/
