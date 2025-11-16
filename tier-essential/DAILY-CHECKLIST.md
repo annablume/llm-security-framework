@@ -4,6 +4,21 @@
 
 ---
 
+## ⚠️ Prerequisites
+
+**Before using this checklist**, make sure you've completed the [Quick Start Guide](QUICK-START.md). Specifically, ensure the daily check script is set up:
+
+```bash
+# If you haven't set it up yet:
+mkdir -p scripts/security
+cp tier-essential/configs/daily-check.sh scripts/security/
+chmod +x scripts/security/daily-check.sh
+```
+
+**If the script doesn't exist**, follow [Step 5 in QUICK-START.md](QUICK-START.md#step-5-set-up-daily-check-2-minutes) first.
+
+---
+
 ## 🌅 Morning Routine
 
 ### 1. Run Daily Security Check (30 seconds)
