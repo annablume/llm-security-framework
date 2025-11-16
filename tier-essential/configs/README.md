@@ -62,6 +62,25 @@ chmod +x ../../.git/hooks/pre-commit
 
 ---
 
+### 5. `daily-check.sh`
+Daily security check script to run every morning.
+
+**Usage**:
+```bash
+cp daily-check.sh ../../scripts/security/daily-check.sh
+chmod +x ../../scripts/security/daily-check.sh
+```
+
+**What it does**:
+- Scans for secrets in your codebase
+- Checks for dependency vulnerabilities
+- Verifies .env files aren't tracked
+- Checks for .cursorignore file
+
+**Run daily**: `./scripts/security/daily-check.sh`
+
+---
+
 ## 🚀 Quick Setup
 
 Copy all templates at once:
@@ -73,6 +92,9 @@ cat tier-essential/configs/.gitignore.template >> .gitignore
 cp tier-essential/configs/.env.example.template .env.example
 cp tier-essential/configs/pre-commit-hook.sh .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
+mkdir -p scripts/security
+cp tier-essential/configs/daily-check.sh scripts/security/
+chmod +x scripts/security/daily-check.sh
 ```
 
 ---

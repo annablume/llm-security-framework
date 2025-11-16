@@ -30,23 +30,42 @@ echo ""
 echo "1️⃣  Scanning for secrets..."
 
 if command -v gitleaks &> /dev/null; then
-    # Scan staged files only
-    gitleaks protect --staged --verbose
+    # Check if only template files are staged (they contain example values, not real secrets)
+    staged_files=$(git diff --cached --name-only)
+    template_files=$(echo "$staged_files" | grep -E "\.(template|example\.template)$" || true)
+    non_template_files=$(echo "$staged_files" | grep -vE "\.(template|example\.template)$" || true)
     
-    if [ $? -ne 0 ]; then
-        echo ""
-        echo -e "${RED}❌ COMMIT BLOCKED: Secrets detected in staged files${NC}"
-        echo ""
-        echo "What to do:"
-        echo "  1. Remove the secret from your code"
-        echo "  2. Add it to .env and load from environment variables"
-        echo "  3. Run: git reset HEAD <file> to unstage"
-        echo "  4. Never commit secrets to Git"
-        echo ""
-        echo "To see details: gitleaks protect --staged --verbose"
-        exit 1
+    if [ -n "$template_files" ] && [ -z "$non_template_files" ]; then
+        # Only template files staged - skip secret scan (they contain example values)
+        echo -e "${GREEN}✓ Only template files staged, skipping secret scan${NC}"
+        echo "   (Template files may contain example values that look like secrets)"
+    else
+        # Scan staged files for secrets
+        # Note: Template files may trigger false positives, but we'll scan everything
+        gitleaks protect --staged --verbose
+        
+        if [ $? -ne 0 ]; then
+            echo ""
+            echo -e "${RED}❌ COMMIT BLOCKED: Secrets detected in staged files${NC}"
+            echo ""
+            if [ -n "$template_files" ]; then
+                echo -e "${YELLOW}⚠️  Note: Template files (.template) may contain example values${NC}"
+                echo "   If the detected secrets are in template files with example values,"
+                echo "   you can bypass this check with: git commit --no-verify"
+                echo "   (Only do this if you're certain they're example values, not real secrets)"
+                echo ""
+            fi
+            echo "What to do:"
+            echo "  1. Remove the secret from your code"
+            echo "  2. Add it to .env and load from environment variables"
+            echo "  3. Run: git reset HEAD <file> to unstage"
+            echo "  4. Never commit secrets to Git"
+            echo ""
+            echo "To see details: gitleaks protect --staged --verbose"
+            exit 1
+        fi
+        echo -e "${GREEN}✓ No secrets detected${NC}"
     fi
-    echo -e "${GREEN}✓ No secrets detected${NC}"
 else
     echo -e "${YELLOW}⚠️  Gitleaks not installed, skipping secret scan${NC}"
     echo "   Install: brew install gitleaks (macOS) or visit https://github.com/gitleaks/gitleaks"

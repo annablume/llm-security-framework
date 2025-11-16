@@ -129,7 +129,7 @@ Copy the daily check script to your project:
 mkdir -p scripts/security
 
 # Copy daily check script
-cp ../../scripts/security/daily-check.sh scripts/security/
+cp tier-essential/configs/daily-check.sh scripts/security/
 
 # Make it executable
 chmod +x scripts/security/daily-check.sh
