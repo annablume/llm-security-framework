@@ -1,0 +1,31 @@
+# LLM Security Framework v3.0 - Gitleaks Ignore Rules
+# 
+# NOTE: This file is currently NOT used. Template file exclusion is handled
+# by the pre-push hook (.git/hooks/pre-push) which filters out template
+# directories and files before checking for secrets.
+#
+# This file is kept for reference and potential future use if gitleaks
+# configuration format changes or if we switch to a config-based approach.
+#
+# Template files with example values that look like secrets but aren't:
+tier-essential/configs/.env.example.template
+tier-essential/configs/.cursorignore.template
+tier-essential/configs/.gitignore.template
+
+# Example files in the repository
+examples/
+docs/examples/
+
+# Documentation files with example values (be selective - only if they contain example secrets)
+# Uncomment if needed:
+# **/README.md
+# **/QUICK-START.md
+
+# Pattern: Any file ending in .example or .template
+*.example
+*.template
+
+# Test fixtures (if you add tests in SESSION 5)
+tests/fixtures/
+test/fixtures/
+__tests__/fixtures/

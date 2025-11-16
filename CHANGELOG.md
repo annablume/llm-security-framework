@@ -249,9 +249,66 @@ N/A - Initial release. For setup instructions, see [README.md](README.md) and ru
 
 ---
 
+## [3.0.0] - 2025-11-15
+
+### 🎉 SESSION 2 - Tier Essential Implementation
+
+**Complete reorganization and tier-based structure**
+
+### ✨ Added
+
+#### Tier Essential (New)
+- **Complete Tier Essential documentation**
+  - `tier-essential/README.md` - Overview and quick start
+  - `tier-essential/QUICK-START.md` - 15-minute setup guide
+  - `tier-essential/DAILY-CHECKLIST.md` - Daily security routine
+  - `tier-essential/LIMITATIONS.md` - Critical understanding of tier limits
+  - `tier-essential/configs/` - Copy-paste configuration templates
+    - `.cursorignore.template` - AI tool file exclusion
+    - `.gitignore.template` - Security entries for gitignore
+    - `.env.example.template` - Environment variable template
+    - `pre-commit-hook.sh` - Automatic secret scanning hook
+
+#### Documentation Reorganization
+- **Moved comprehensive guide to archive**
+  - `docs/LLM-Security-Guidelines.md` → `docs/archive/LLM-Security-Guidelines.md`
+  - Preserved for reference, replaced by tier-based structure
+
+#### Updated Documentation
+- **README.md** - Updated to highlight tier structure and links
+- **SECURITY-TIERS.md** - Updated with tier links and session markers
+- **CHANGELOG.md** - Added SESSION 2 entry
+
+### 🔄 Changed
+
+#### Project Structure
+- Reorganized from single comprehensive guide to tier-based structure
+- Tier Essential now standalone with complete documentation
+- Clear separation between Essential, Standard (future), and Hardened (future) tiers
+
+#### Documentation Links
+- Updated all internal links to reflect new structure
+- Added session markers (SESSION 2, SESSION 3, SESSION 4) for future work
+
+### 📊 Statistics
+
+- **4 new documentation files** in tier-essential/
+- **4 configuration templates** ready for copy-paste
+- **Complete 15-minute setup path** for hobby projects
+- **Clear limitations documentation** to prevent misuse
+
+### 🎯 Focus Areas
+
+- **Tier Essential**: Complete implementation for hobby projects
+- **Clear boundaries**: Explicit about what Essential tier does NOT protect
+- **Quick setup**: 15-minute path to basic security
+- **Future-ready**: Structure prepared for Standard and Hardened tiers
+
+---
+
 ## [Unreleased]
 
-### Planned Features
+### Planned Features (SESSION 3)
 - Additional cloud provider configurations (AWS, Azure, GCP)
 - VS Code extension security guidelines
 - Terraform/IaC security templates
