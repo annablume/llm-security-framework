@@ -291,11 +291,16 @@ echo ""
 
 echo "9️⃣  Checking for TODO/FIXME comments..."
 
-todo_count=$(git diff $remote_sha..$local_sha | grep -E "^\+.*TODO|^\+.*FIXME" | wc -l)
+if [ -n "$range" ]; then
+    todo_count=$(git diff "$range" 2>/dev/null | grep -E "^\+.*TODO|^\+.*FIXME" | wc -l)
+else
+    # No ref range available (for example, some non-standard push contexts)
+    todo_count=0
+fi
 
 if [ $todo_count -gt 0 ]; then
     echo -e "${YELLOW}⚠️  Found $todo_count TODO/FIXME comments in new code${NC}"
-    git diff $remote_sha..$local_sha | grep -n -E "^\+.*TODO|^\+.*FIXME" | head -5
+    git diff "$range" | grep -n -E "^\+.*TODO|^\+.*FIXME" | head -5
     echo ""
     echo "Consider resolving these before pushing"
     read -p "Continue anyway? (y/N) " -n 1 -r

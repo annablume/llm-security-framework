@@ -243,6 +243,20 @@ cat > .git/hooks/pre-push << 'EOF'
 
 echo "🔍 Running pre-push security checks..."
 
+# Get refs being pushed to build a safe diff range
+while read local_ref local_sha remote_ref remote_sha
+do
+    if [ "$local_sha" = "0000000000000000000000000000000000000000" ]; then
+        continue
+    fi
+
+    if [ "$remote_sha" = "0000000000000000000000000000000000000000" ]; then
+        range="$local_sha"
+    else
+        range="$remote_sha..$local_sha"
+    fi
+done
+
 # Full repository scan
 if command -v gitleaks &> /dev/null; then
     gitleaks detect --source . --verbose
@@ -263,6 +277,18 @@ if [[ " ${protected_branches[@]} " =~ " ${current_branch} " ]]; then
     echo "❌ Direct push to protected branch '$current_branch' not allowed"
     echo "Create a pull request instead"
     exit 1
+fi
+
+# Check for unresolved TODO/FIXME comments in outgoing changes
+if [ -n "$range" ]; then
+    todo_count=$(git diff "$range" 2>/dev/null | grep -E "^\+.*TODO|^\+.*FIXME" | wc -l)
+else
+    todo_count=0
+fi
+
+if [ "$todo_count" -gt 0 ]; then
+    echo "⚠️  Found $todo_count TODO/FIXME comments in outgoing changes"
+    git diff "$range" | grep -n -E "^\+.*TODO|^\+.*FIXME" | head -5
 fi
 
 echo "✅ Pre-push checks passed"
