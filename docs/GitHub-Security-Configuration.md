@@ -62,11 +62,11 @@ Protect matching branches:
   
   ✓ Require status checks to pass before merging
     - Require branches to be up to date before merging
-    - Status checks: (add these)
-      • security/secret-scan
-      • security/dependency-check
-      • ci/tests
-      • ci/lint
+    - Status checks: (match your workflow job names exactly)
+      • Security Scan / secret-scan
+      • Security Scan / dependency-scan
+      • ci/tests (if configured)
+      • ci/lint (if configured)
   
   ✓ Require conversation resolution before merging
   ✓ Require signed commits (optional but recommended)
@@ -444,12 +444,11 @@ updates:
 Add these required checks before merging:
 
 ```
-✓ security/secret-scan
-✓ security/dependency-check
-✓ security/code-quality
-✓ ci/tests
-✓ ci/build
-✓ ci/lint
+✓ Security Scan / secret-scan
+✓ Security Scan / dependency-scan
+✓ ci/tests (if configured)
+✓ ci/build (if configured)
+✓ ci/lint (if configured)
 ```
 
 Configure these in your CI/CD workflows.

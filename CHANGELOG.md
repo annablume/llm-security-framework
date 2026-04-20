@@ -51,18 +51,13 @@ The first production-ready release of the LLM Security Framework - a comprehensi
   - Sets up Git pre-commit hooks
   - Sets up Git pre-push hooks
   - Creates security utility scripts
-  - Generates GitHub Actions workflows
+  - Generates a baseline GitHub Actions workflow when `.github/workflows` exists
   - Runs initial security scan
 
 #### GitHub Templates & Workflows
 - **Security Scan Workflow** (`security-scan.yml`)
-  - Secret scanning (Gitleaks + TruffleHog)
-  - Dependency scanning (npm audit + Snyk + OWASP)
-  - Code quality checks (ESLint + TypeScript)
-  - License compliance verification
-  - SBOM generation
-  - Container scanning (Trivy)
-  - Automated security summary reports
+  - Baseline automated checks: Gitleaks secret scan + npm audit dependency scan
+  - Extended checks (TruffleHog, Snyk, OWASP, SBOM, Trivy) are available as template/documentation guidance and require manual setup
 
 - **CODEOWNERS Template**
   - 100+ security-sensitive path patterns
@@ -219,10 +214,9 @@ The first production-ready release of the LLM Security Framework - a comprehensi
 ### 🔧 Technical Improvements
 
 - Gitleaks integration for secret detection
-- GitHub Advanced Security workflow templates
-- Automated dependency scanning with multiple tools
-- SBOM generation for supply chain transparency
-- Container security scanning
+- Baseline GitHub Actions security workflow with stable check names
+- Automated baseline dependency scanning (npm audit)
+- Expanded workflow examples for SBOM/container/deep scanning in docs/templates (manual enablement)
 - Pre-commit and pre-push validation
 - Comprehensive logging and monitoring guidelines
 

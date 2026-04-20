@@ -67,9 +67,13 @@ This package contains everything you need to secure your AI-assisted development
 - ✅ Sets up Git pre-commit hooks
 - ✅ Sets up Git pre-push hooks
 - ✅ Creates security scripts
-- ✅ Creates GitHub Actions workflows
+- ✅ Creates a baseline GitHub Actions workflow (only when `.github/workflows` already exists)
 - ✅ Generates SECURITY.md
 - ✅ Runs initial security scan
+
+**Scope note**:
+- The setup script automates local guardrails and baseline CI scaffolding.
+- Advanced CI jobs (for example TruffleHog, Snyk, OWASP Dependency Check, SBOM, Trivy) are documented templates/examples and require manual enablement plus credentials.
 
 **How to use**:
 ```bash

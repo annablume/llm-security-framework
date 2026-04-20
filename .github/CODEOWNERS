@@ -1,0 +1,23 @@
+# Repository default owner
+* @annablume
+
+# Security-critical controls
+SECURITY.md @annablume
+scripts/security-setup.sh @annablume
+scripts/security/ @annablume
+.cursorignore @annablume
+
+# CI/CD and governance
+.github/workflows/ @annablume
+.github/CODEOWNERS @annablume
+
+# Dependency and runtime config
+package.json @annablume
+package-lock.json @annablume
+requirements.txt @annablume
+Pipfile @annablume
+Pipfile.lock @annablume
+
+# Security documentation and templates
+docs/ @annablume
+templates/ @annablume

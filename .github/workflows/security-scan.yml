@@ -1,0 +1,64 @@
+name: Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  dependency-scan:
+    name: dependency-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect supported dependency manifests
+        id: detect-manifests
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            echo "npm=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.detect-manifests.outputs.npm == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install dependencies
+        if: steps.detect-manifests.outputs.npm == 'true'
+        run: npm ci
+
+      - name: Run npm audit
+        if: steps.detect-manifests.outputs.npm == 'true'
+        run: npm audit --audit-level=moderate
+
+      - name: Skip when no supported manifests
+        if: steps.detect-manifests.outputs.npm != 'true'
+        run: echo "No npm lockfile found; dependency scan skipped."

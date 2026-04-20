@@ -338,16 +338,19 @@ gitleaks detect --source . --verbose --report-path "$INCIDENT_DIR/leak-report.js
 
 # Check if pushed
 echo "2. Checking if secret reached remote..."
-git fetch --all
-LEAK_COMMIT=$(git log --all -p | grep -m 1 "KEYWORD" | head -1 | awk '{print $2}')
+git fetch --all --prune
 
-if [ ! -z "$LEAK_COMMIT" ]; then
-    if git branch -r --contains $LEAK_COMMIT 2>/dev/null; then
-        echo "⚠️  CRITICAL: Secret was pushed to remote"
-        echo "Action required: Rotate credentials immediately"
-        echo "See: $INCIDENT_DIR/response-steps.txt"
-        
-        cat > "$INCIDENT_DIR/response-steps.txt" << 'STEPS'
+# Scan remote refs directly so we can distinguish remote exposure
+if gitleaks detect --source . --verbose --log-opts="--remotes" --report-path "$INCIDENT_DIR/remote-leak-report.json"; then
+    echo "✓ No leaks detected in remote refs"
+    echo "Action: Secret appears confined to local history"
+    echo "Action: Amend or rebase to remove local leak before pushing"
+else
+    echo "⚠️  CRITICAL: Secret was pushed to remote"
+    echo "Action required: Rotate credentials immediately"
+    echo "See: $INCIDENT_DIR/response-steps.txt"
+    
+    cat > "$INCIDENT_DIR/response-steps.txt" << 'STEPS'
 IMMEDIATE ACTIONS REQUIRED:
 
 1. ROTATE ALL POTENTIALLY AFFECTED CREDENTIALS
@@ -377,15 +380,11 @@ IMMEDIATE ACTIONS REQUIRED:
 
 Time logged: $(date)
 STEPS
-    else
-        echo "✓ Secret only in local history"
-        echo "Action: Amend or rebase to remove"
-    fi
 fi
 
 echo ""
 echo "📂 Incident data saved to: $INCIDENT_DIR"
-echo "Next: Follow steps in response-steps.txt"
+echo "Next: Follow steps in response-steps.txt if remote leak detected"
 EOF
 
 chmod +x scripts/security/secret-leak-response.sh
