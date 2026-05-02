@@ -700,5 +700,5 @@ Every contribution, no matter how small, makes a difference. Thank you for helpi
 
 ---
 
-**Last Updated**: November 2025  
-**Version**: 2.0
+**Last Updated**: May 2026  
+**Version**: 2.1
