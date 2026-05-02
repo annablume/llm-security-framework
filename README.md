@@ -9,7 +9,7 @@
 
 This package contains everything you need to secure your AI-assisted development workflow with Claude Code, Cursor, GitHub, Netlify, and Supabase.
 
-### 1. **LLM-Security-Guidelines.md** (50KB) ⭐ PRIMARY DOCUMENT
+### 1. **docs/LLM-Security-Guidelines.md** (50KB) ⭐ PRIMARY DOCUMENT
 **Purpose**: Comprehensive security framework  
 **Audience**: All developers, security team  
 **Use case**: Complete reference guide
@@ -31,7 +31,7 @@ This package contains everything you need to secure your AI-assisted development
 
 ---
 
-### 2. **Security-Quick-Reference.md** (5KB) ⭐ DAILY USE
+### 2. **docs/Security-Quick-Reference.md** (5KB) ⭐ DAILY USE
 **Purpose**: One-page cheat sheet  
 **Audience**: All developers  
 **Use case**: Keep at your desk, check daily
@@ -55,10 +55,12 @@ This package contains everything you need to secure your AI-assisted development
 
 ---
 
-### 3. **security-setup.sh** (14KB) ⭐ ONE-TIME SETUP
+### 3. **security-setup.sh** → **scripts/security-setup.sh** ⭐ ONE-TIME SETUP
 **Purpose**: Automated security configuration  
 **Audience**: DevOps, team leads, developers  
 **Use case**: Initial repository setup
+
+The root `security-setup.sh` is a thin wrapper — run it from the repo root for convenience. The actual script lives in `scripts/security-setup.sh`.
 
 **What it does**:
 - ✅ Installs Gitleaks (secret scanner)
@@ -97,7 +99,7 @@ chmod +x security-setup.sh
 
 ---
 
-### 4. **GitHub-Security-Configuration.md** (16KB) ⭐ GITHUB SETUP
+### 4. **docs/GitHub-Security-Configuration.md** (16KB) ⭐ GITHUB SETUP
 **Purpose**: Complete GitHub organization hardening guide  
 **Audience**: DevOps, organization admins, security team  
 **Use case**: GitHub configuration and maintenance
@@ -117,6 +119,49 @@ chmod +x security-setup.sh
 - Hardening existing repositories
 - Monthly security reviews
 - After security incidents
+
+### 5. **.github/workflows/security-scan.yml** ⭐ LIVE CI SECURITY
+
+**Purpose**: Hardened GitHub Actions workflow that runs on every push and PR  
+**Jobs**:
+- `workflow-lint` — runs [zizmor](https://github.com/woodruffw/zizmor) to catch workflow security issues
+- `secret-scan` — runs gitleaks with a verified egress allowlist (harden-runner block mode)
+- `dependency-scan` — runs `npm audit` when a lockfile is present
+
+The runner uses `step-security/harden-runner` in **block mode** — all outbound traffic not in the allowlist is rejected.
+
+---
+
+### 6. **templates/** — Hook and workflow templates
+
+Pre-commit and pre-push hook templates, a `.cursorignore` template, a `CODEOWNERS` template, and advanced CI workflow templates (TruffleHog, Snyk, OWASP, SBOM, Trivy). These require manual enablement and credentials — see `templates/README.md`.
+
+---
+
+### 7. **examples/** — Ready-to-copy configs
+
+| File | Purpose |
+|------|---------|
+| `examples/netlify.toml.example` | Netlify security headers and redirect rules |
+| `examples/supabase-rls-policies.sql` | Row-level security policy starters |
+| `examples/incident-response-template.md` | Incident response runbook template |
+
+---
+
+### 8. **Editor skills**
+
+| Path | Editor |
+|------|--------|
+| `.claude/skills/ai-security-workflows/SKILL.md` | Claude Code |
+| `.cursor/skills/ai-security-workflows/SKILL.md` | Cursor |
+
+Copy to `~/.claude/skills/` or `~/.cursor/skills/` to reuse the skill in other repositories.
+
+---
+
+### 9. **Repo hygiene files**
+
+`CHANGELOG.md` · `CONTRIBUTING.md` · `SECURITY.md` · `LICENSE`
 
 ---
 
@@ -416,9 +461,11 @@ Re-check upstream guidance on a cadence your team commits to (for example quarte
 
 After changing [`.github/workflows/security-scan.yml`](.github/workflows/security-scan.yml), apply the same YAML to the embedded block in [`scripts/security-setup.sh`](scripts/security-setup.sh) (see the workflow file header comment).
 
-### Agent skill: AI security for workflows
+### Editor skills: AI security for workflows
 
-Bundled project skill: [`.cursor/skills/ai-security-workflows/SKILL.md`](.cursor/skills/ai-security-workflows/SKILL.md). Copy to `~/.cursor/skills/ai-security-workflows/` to reuse it in other repositories.
+Bundled for both editors:
+- Claude Code: [`.claude/skills/ai-security-workflows/SKILL.md`](.claude/skills/ai-security-workflows/SKILL.md) → copy to `~/.claude/skills/ai-security-workflows/`
+- Cursor: [`.cursor/skills/ai-security-workflows/SKILL.md`](.cursor/skills/ai-security-workflows/SKILL.md) → copy to `~/.cursor/skills/ai-security-workflows/`
 
 ### Hooks vs `templates/`
 
@@ -436,6 +483,7 @@ Whenever `.github/PULL_REQUEST_TEMPLATE.md` or `.github/ISSUE_TEMPLATE/` changes
 |---------|------|---------------|
 | 1.0 | 2025-11 | Initial German version (user-created) |
 | 2.0 | 2025-11-14 | Production-ready English expansion with:<br>• 17 comprehensive sections<br>• Tool-specific configs<br>• Incident response procedures<br>• Setup automation<br>• GitHub hardening guide |
+| 2.1 | 2026-05 | CI hardening:<br>• harden-runner switched to block mode with verified egress allowlist<br>• gitleaks-action wired with license secret<br>• Claude Code skill added alongside Cursor skill |
 
 ---
 
