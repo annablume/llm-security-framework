@@ -440,17 +440,20 @@ END $$;
 
 ```sql
 -- User can only read their own data
+-- Use (select auth.uid()) — Postgres caches the result per statement, not per row
 CREATE POLICY "Users can view own data"
 ON public.users
 FOR SELECT
-USING (auth.uid() = id);
+TO authenticated
+USING ((select auth.uid()) = id);
 
 -- User can only update their own data
 CREATE POLICY "Users can update own data"
 ON public.users
 FOR UPDATE
-USING (auth.uid() = id)
-WITH CHECK (auth.uid() = id);
+TO authenticated
+USING ((select auth.uid()) = id)
+WITH CHECK ((select auth.uid()) = id);
 
 -- Service role bypass (for backend operations only)
 CREATE POLICY "Service role has full access"
@@ -458,6 +461,28 @@ ON public.users
 FOR ALL
 USING (auth.jwt()->>'role' = 'service_role');
 ```
+
+#### ⚡ RLS Performance
+
+- **Wrap auth functions in `SELECT`**: `(select auth.uid())` instead of `auth.uid()`. Postgres evaluates `auth.uid()` once per statement rather than once per row — benchmarks show 94–99% improvement.
+- **Index policy columns**: add an index on any column referenced in policies (e.g. `user_id`).
+- **Specify `TO <role>`**: use `TO authenticated` to skip policy evaluation entirely for unauthenticated roles.
+- **Avoid joins in policies**: fetch authorization data into arrays and use `IN`/`ANY` instead.
+
+#### ⚠️ RLS Auth Warnings
+
+**`auth.uid()` returns `null` for unauthenticated users.** Comparisons like `null = user_id` silently fail rather than raising an error. Be explicit:
+
+```sql
+-- Explicit null guard
+USING (auth.uid() IS NOT NULL AND (select auth.uid()) = user_id)
+```
+
+**JWT freshness**: changes to `app_metadata` don't reflect in policies until the user refreshes their token. Do not rely on `app_metadata` for real-time access revocation.
+
+**Use `raw_app_meta_data`, not `user_metadata`**: `user_metadata` is editable by the user — never use it for authorization decisions. Store roles and permissions in `raw_app_meta_data` (only writable server-side).
+
+**Security definer functions must live in unexposed schemas**: if you use `security definer` functions to bypass RLS for complex authorization logic, place them in a schema not exposed via the API (not `public`).
 
 ### 🔴 CRITICAL: API Key Management
 
@@ -2024,7 +2049,8 @@ This document should be reviewed and updated:
 - **OWASP Top 10**: https://owasp.org/www-project-top-ten/
 - **OWASP AI Security**: https://owasp.org/www-project-ai-security-and-privacy-guide/
 - **Anthropic Security Best Practices**: https://docs.anthropic.com/security
-- **Supabase Security**: https://supabase.com/docs/guides/platform/security
+- **Supabase Security**: https://supabase.com/docs/guides/security
+- **Supabase RLS**: https://supabase.com/docs/guides/database/postgres/row-level-security
 - **GitHub Security**: https://docs.github.com/en/code-security
 - **Netlify Security**: https://docs.netlify.com/security/
 
