@@ -7,7 +7,8 @@ scripts/security-setup.sh @annablume
 scripts/security/ @annablume
 .cursorignore @annablume
 
-# CI/CD and governance
+# CI/CD and governance (entire .github/ hierarchy for CODEOWNERS review)
+/.github/ @annablume
 .github/workflows/ @annablume
 .github/CODEOWNERS @annablume
 

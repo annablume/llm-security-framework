@@ -78,7 +78,7 @@ GitHub deployment environments provide an additional security boundary orthogona
 - [ ] Check the **audit log** (GitHub org audit log or repo audit log) for unexpected token usage, workflow triggers, and permission changes in the past 24–48 hours.
 - [ ] Inspect **artifact and cache content** from recent runs for exfiltrated data or injected payloads.
 - [ ] **Disable the workflow** (rename or remove) before investigating further—do not just revert; a compromised action may have already run.
-- [ ] Follow `docs/incident-response-template.md` in this repo for structured documentation of timeline, impact, and remediation steps.
+- [ ] Follow `examples/incident-response-template.md` in this repo for structured documentation of timeline, impact, and remediation steps.
 
 ## Definition of done
 
@@ -99,8 +99,10 @@ This repository ships the following security infrastructure—use it, don't dupl
 |------|----------|--------------|
 | **Secret scan (CI)** | `.github/workflows/security-scan.yml` → `secret-scan` job | Gitleaks full-history scan on every push/PR to main/develop |
 | **Dependency scan (CI)** | `.github/workflows/security-scan.yml` → `dependency-scan` job | `npm audit` at moderate severity threshold |
-| **Pre-commit hook** | `templates/pre-commit.template` | 7 local checks: secret patterns, .env files, large files, debug code—install via `scripts/security-setup.sh` |
-| **Pre-push hook** | `templates/pre-push.template` | Full Gitleaks scan before push |
+| **Pre-commit hook (minimal, default)** | Installed into `.git/hooks/pre-commit` by `scripts/security-setup.sh` | Gitleaks staged scan, `.env` block, interactive debug-pattern prompt |
+| **Pre-commit hook (extended, optional)** | `templates/pre-commit.template` | Heavier checklist (extra patterns, UX); copy manually if desired—behavior differs from the installer baseline |
+| **Pre-push hook (minimal, default)** | Installed by `scripts/security-setup.sh` | Gitleaks repo scan + protected-branch guard + provisional-marker notices |
+| **Pre-push hook (extended, optional)** | `templates/pre-push.template` | Stricter/longer variant; copy manually **only** after reading `templates/README.md` |
 | **AI context protection** | `.cursorignore` / `templates/.cursorignore.template` | Prevents secrets, build artifacts, and logs from loading into Cursor/Claude context windows |
 | **CODEOWNERS** | `.github/CODEOWNERS` | Enforces review on all security-sensitive paths |
 | **Incident response** | `docs/incident-response-template.md` | Structured timeline and RCA template for security events |
