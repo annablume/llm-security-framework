@@ -455,7 +455,7 @@ Re-check upstream guidance on a cadence your team commits to (for example quarte
 | Anthropic CLI | Install and credential storage docs for coding agents | 2026-05-03 |
 | Gitleaks | Install commands and `protect` / `detect` usage | 2026-05-03 |
 | Netlify | `examples/netlify.toml.example` vs current platform security docs | 2026-05-03 |
-| Supabase | RLS and dashboard security wording in docs | 2026-05-03 |
+| Supabase | RLS and dashboard security wording in docs | 2026-05-02 |
 
 ### CI and installer parity
 
