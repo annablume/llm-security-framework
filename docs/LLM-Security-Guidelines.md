@@ -188,68 +188,112 @@ MCP servers execute code on your behalf and can access external services. They r
 
 ### 🔴 CRITICAL: API Key Management
 
-**Never** store Claude API keys in:
-- Repository files
-- Environment files committed to Git
-- Claude Code config files in workspace
+Claude Code stores credentials encrypted at `~/.claude/`. **Never** place API keys in:
+- Repository files or `.claude/settings.json` checked into git
+- Environment files committed to git
+- `CLAUDE.md` files (these are sent to the model as context)
 
-#### Secure Configuration
+Claude Code reads the API key from your shell environment. Set it in your shell profile (`~/.zshrc`, `~/.bashrc`), not in project files.
 
-```bash
-# Store in OS-level credential manager
+### 🔴 CRITICAL: Permission Model
 
-# macOS Keychain
-security add-generic-password -a ${USER} -s claude-api-key -w "sk-ant-..."
+Claude Code uses a tiered permission system — read-only operations run silently, but bash commands and file edits require explicit approval.
 
-# Linux Secret Service
-secret-tool store --label='Claude API Key' application claude key api-key
+**Permission rule precedence**: `deny → ask → allow`. Deny rules always win.
 
-# Windows Credential Manager
-cmdkey /generic:claude-api-key /user:api /pass:"sk-ant-..."
+Lock down sensitive files in `.claude/settings.json` (checked into git, applies to all collaborators):
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Bash(curl *)",
+      "Bash(wget *)"
+    ],
+    "defaultMode": "plan"
+  }
+}
 ```
 
-```bash
-# ~/.config/claude-code/config.yaml
-# DO NOT commit this file to any repository
-api_key: ${CLAUDE_API_KEY}  # Load from environment
-workspace_exclusions:
-  - .env*
-  - secrets/
-  - *.key
-  - credentials/
+> `curl` and `wget` are blocked by default as a prompt injection safeguard — they can be used to fetch and execute arbitrary remote content. Re-enabling them requires explicit approval.
+
+**Permission modes** — set `defaultMode` per project:
+
+| Mode | When to use |
+|------|-------------|
+| `plan` | Sensitive repos — Claude can analyse but not edit or run commands |
+| `default` | Normal development — prompts for each new tool use |
+| `acceptEdits` | Trusted workflows — auto-approves file edits, still prompts for commands |
+| `bypassPermissions` | **Only in isolated VMs/containers** — skips all prompts |
+
+> **Never use `bypassPermissions` outside an isolated environment.** If required for automation, set `permissions.disableBypassPermissionsMode: "disable"` in managed settings to prevent it org-wide.
+
+Use `/permissions` inside a Claude Code session to audit all active rules and their source files.
+
+### 🟠 HIGH: Sandbox for OS-Level Isolation
+
+Permissions control what Claude *asks* to do — sandboxing enforces it at the OS level, preventing bash commands and child processes from reaching outside defined boundaries even under prompt injection.
+
+Enable with `/sandbox` in a session, or set in `.claude/settings.json`:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "filesystem": {
+      "denyRead": ["~/.aws/credentials", "~/.ssh/**"]
+    },
+    "network": {
+      "allowedDomains": ["github.com", "*.npmjs.org"],
+      "deniedDomains": []
+    }
+  }
+}
 ```
 
-### 🟠 HIGH: Command Execution Validation
+> Note: `Read(./.env)` deny rules block Claude's built-in file tools but **not** `cat .env` in bash. Enable the sandbox to enforce OS-level file access restrictions.
 
-Claude Code can run terminal commands. **Every command must be reviewed**.
+### 🟠 HIGH: Write Scope
 
-#### Safe Practices
+Claude Code can only write to the directory where it was started and its subdirectories. It **cannot** modify files in parent directories without explicit permission. Always launch Claude Code from your project root, not from `/` or `~`.
 
-```bash
-# BAD - Direct execution without review
-claude-code --execute-all
+### 🟠 HIGH: MCP Server Security
 
-# GOOD - Step-by-step with confirmation
-claude-code --interactive --confirm-commands
+Claude Code loads MCP servers configured in `.mcp.json` or `.claude/settings.json`. Anthropic does not audit third-party MCP servers.
 
-# BEST - Audit log enabled
-claude-code --interactive --log-commands ~/.claude-code/audit.log
+- Only add MCP servers from sources you trust and have reviewed
+- New MCP servers require explicit trust verification on first use — do not blindly approve
+- Use minimal API scopes for any credentials MCP servers require
+- Set `allowManagedMcpServersOnly: true` in managed settings to restrict to admin-approved servers only
+
+### 🟡 MEDIUM: CLAUDE.md Security
+
+`CLAUDE.md` is loaded as context on every session. Because it is sent to the model:
+- **Never put secrets, tokens, or internal credentials** in `CLAUDE.md`
+- Treat it as public-facing documentation
+- Review AI-generated additions before committing — prompt injection via malicious file content can embed instructions into `CLAUDE.md`
+
+### 🟡 MEDIUM: Team Enforcement via Managed Settings
+
+For shared repositories, use `.claude/settings.json` to enforce security baselines for all collaborators:
+
+```json
+{
+  "permissions": {
+    "deny": [
+      "Bash(git push --force *)",
+      "Bash(rm -rf *)",
+      "Read(./.env)"
+    ],
+    "defaultMode": "plan"
+  }
+}
 ```
 
-### 🟡 MEDIUM: Workspace Isolation
-
-```bash
-# Create isolated workspace profiles for different security zones
-
-# Development (relaxed)
-claude-code --profile dev --workspace ./dev-project
-
-# Production (restricted)
-claude-code --profile prod --workspace ./prod-project \
-  --disable-file-writes \
-  --read-only-mode \
-  --log-level debug
-```
+For organisation-wide enforcement that cannot be overridden, use managed settings (delivered via MDM or `/etc/claude-code/managed-settings.json`). Managed settings support `allowManagedPermissionRulesOnly`, `allowManagedMcpServersOnly`, and `disableBypassPermissionsMode`.
 
 ---
 
@@ -2091,7 +2135,8 @@ This document should be reviewed and updated:
 
 - **OWASP Top 10**: https://owasp.org/www-project-top-ten/
 - **OWASP AI Security**: https://owasp.org/www-project-ai-security-and-privacy-guide/
-- **Anthropic Security Best Practices**: https://docs.anthropic.com/security
+- **Claude Code Security**: https://code.claude.com/docs/en/security
+- **Claude Code Permissions**: https://code.claude.com/docs/en/permissions
 - **Supabase Security**: https://supabase.com/docs/guides/security
 - **Supabase RLS**: https://supabase.com/docs/guides/database/postgres/row-level-security
 - **GitHub Security**: https://docs.github.com/en/code-security
