@@ -451,7 +451,7 @@ Re-check upstream guidance on a cadence your team commits to (for example quarte
 | Area | What to re-check | Last reviewed |
 |------|------------------|---------------|
 | GitHub Actions / platform | Runner Node defaults, pinned action versions, org security UI paths | 2026-05-03 |
-| Editor rules / MCP | Ignore-file docs, in-repo rules as a trust boundary, MCP credentials and egress | 2026-05-03 |
+| Editor rules / MCP | Ignore-file docs, in-repo rules as a trust boundary, MCP credentials and egress | 2026-05-02 |
 | Anthropic CLI | Install and credential storage docs for coding agents | 2026-05-03 |
 | Gitleaks | Install commands and `protect` / `detect` usage | 2026-05-03 |
 | Netlify | `examples/netlify.toml.example` vs current platform security docs | 2026-05-03 |
