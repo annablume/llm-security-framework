@@ -397,6 +397,39 @@ security@yourcompany.com → your-actual-security-email
 
 ---
 
+## Maintainer notes
+
+### Vendor documentation validation
+
+Re-check upstream guidance on a cadence your team commits to (for example quarterly). Update **Last reviewed** after each pass.
+
+| Area | What to re-check | Last reviewed |
+|------|------------------|---------------|
+| GitHub Actions / platform | Runner Node defaults, pinned action versions, org security UI paths | 2026-05-03 |
+| Editor rules / MCP | Ignore-file docs, in-repo rules as a trust boundary, MCP credentials and egress | 2026-05-03 |
+| Anthropic CLI | Install and credential storage docs for coding agents | 2026-05-03 |
+| Gitleaks | Install commands and `protect` / `detect` usage | 2026-05-03 |
+| Netlify | `examples/netlify.toml.example` vs current platform security docs | 2026-05-03 |
+| Supabase | RLS and dashboard security wording in docs | 2026-05-03 |
+
+### CI and installer parity
+
+After changing [`.github/workflows/security-scan.yml`](.github/workflows/security-scan.yml), apply the same YAML to the embedded block in [`scripts/security-setup.sh`](scripts/security-setup.sh) (see the workflow file header comment).
+
+### Agent skill: AI security for workflows
+
+Bundled project skill: [`.cursor/skills/ai-security-workflows/SKILL.md`](.cursor/skills/ai-security-workflows/SKILL.md). Copy to `~/.cursor/skills/ai-security-workflows/` to reuse it in other repositories.
+
+### Hooks vs `templates/`
+
+[`scripts/security-setup.sh`](scripts/security-setup.sh) installs **minimal** hooks. [`templates/README.md`](templates/README.md) explains how that differs from the longer `pre-commit` / `pre-push` template files.
+
+### GitHub template smoke check
+
+Whenever `.github/PULL_REQUEST_TEMPLATE.md` or `.github/ISSUE_TEMPLATE/` changes, open a test issue or PR on GitHub and confirm the sections render as expected. Record the verification date under **Unreleased** in [`CHANGELOG.md`](CHANGELOG.md) or refresh the **Last reviewed** row above.
+
+---
+
 ## 📝 Version History
 
 | Version | Date | Major Changes |

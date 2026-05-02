@@ -204,8 +204,8 @@ chmod +x scripts/*.sh
 cp templates/pre-commit.template .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 
-# Test that everything works
-./scripts/security-setup.sh --dry-run  # If available
+# Validate setup script parses (does not run a full install)
+bash -n scripts/security-setup.sh
 ```
 
 ---
@@ -605,6 +605,22 @@ Contributors are recognized in:
 - Release notes
 - Project README (for significant contributions)
 - Security Hall of Fame (for security improvements)
+
+---
+
+## Maintainer playbook
+
+### CI and `security-setup.sh` stay in sync
+
+[`.github/workflows/security-scan.yml`](.github/workflows/security-scan.yml) and the heredoc emitted by [`scripts/security-setup.sh`](scripts/security-setup.sh) must stay **identical** for new installs. Follow the header comment in the workflow file when editing.
+
+### Hooks versus `templates/`
+
+The setup script writes **minimal** hooks. The files under [`templates/`](templates/README.md) are **optional, extended** presets; they are **not** bit-for-bit the same as the installer output. See [`templates/README.md`](templates/README.md).
+
+### GitHub templates
+
+After changing issue or PR templates under `.github/`, run a quick smoke test on GitHub (new issue/PR) and note the date in [CHANGELOG.md](CHANGELOG.md) **[Unreleased]** or the README maintainer table.
 
 ---
 

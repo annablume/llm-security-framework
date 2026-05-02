@@ -2,7 +2,9 @@
 
 **For**: AI-Assisted Development with Claude Code, Cursor  
 **Version**: 2.0  
-**Last Updated**: November 2025
+**Last Updated**: November 2025  
+
+**Maintainers:** For a cross-vendor revalidation cadence (GitHub, Actions, other tools in this bundle), see **Maintainer notes** in the repository [`README.md`](../README.md). When you change tracked workflows, keep them aligned with [`scripts/security-setup.sh`](../scripts/security-setup.sh) as described there and in the workflow file header comment.
 
 ---
 

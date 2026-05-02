@@ -3,6 +3,9 @@
 # LLM Security Setup Script
 # Version 2.0
 # This script automates the setup of security controls for AI-assisted development
+#
+# Existing .github/workflows/security-scan.yml is not overwritten unless you set:
+#   LLM_SECURITY_FRAMEWORK_OVERWRITE_WORKFLOW=1
 
 set -e  # Exit on error
 
@@ -421,50 +424,85 @@ echo ""
 # 7. Create GitHub Actions workflow (if .github exists)
 if [ -d .github/workflows ]; then
     echo "7️⃣  Creating GitHub Actions security workflow..."
-    
+    WORKFLOW_DEST=".github/workflows/security-scan.yml"
+    if [ -f "$WORKFLOW_DEST" ] && [ "${LLM_SECURITY_FRAMEWORK_OVERWRITE_WORKFLOW:-}" != "1" ]; then
+        warning "$WORKFLOW_DEST already exists — skipping (set LLM_SECURITY_FRAMEWORK_OVERWRITE_WORKFLOW=1 to replace)"
+    else
     cat > .github/workflows/security-scan.yml << 'EOF'
+# Maintainer note: Duplicate substantive changes here into the heredoc in
+# scripts/security-setup.sh under "Creating GitHub Actions security workflow".
+
 name: Security Scan
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
+
+permissions:
+  contents: read
 
 jobs:
   secret-scan:
+    name: secret-scan
     runs-on: ubuntu-latest
-    name: Scan for secrets
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   dependency-scan:
+    name: dependency-scan
     runs-on: ubuntu-latest
-    name: Scan dependencies
+    permissions:
+      contents: read
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - name: Detect supported dependency manifests
+        id: detect-manifests
+        shell: bash
+        run: |
+          if [ -f package-lock.json ] || [ -f npm-shrinkwrap.json ]; then
+            echo "npm=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "npm=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up Node.js
+        if: steps.detect-manifests.outputs.npm == 'true'
+        env:
+          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+        uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: "24"
 
       - name: Install dependencies
+        if: steps.detect-manifests.outputs.npm == 'true'
         run: npm ci
 
       - name: Run npm audit
+        if: steps.detect-manifests.outputs.npm == 'true'
         run: npm audit --audit-level=moderate
-        continue-on-error: true
-EOF
 
-    status "GitHub Actions workflow created"
+      - name: Skip when no supported manifests
+        if: steps.detect-manifests.outputs.npm != 'true'
+        run: echo "No npm lockfile found; dependency scan skipped."
+EOF
+    status "GitHub Actions workflow created or updated"
+    fi
 else
     warning "No .github/workflows directory found, skipping GitHub Actions setup"
 fi
@@ -472,6 +510,9 @@ echo ""
 
 # 8. Create security documentation
 echo "8️⃣  Creating security documentation..."
+if [ -f SECURITY.md ]; then
+    warning "SECURITY.md already exists — skipping boilerplate overwrite (merge manually if needed)"
+else
 cat > SECURITY.md << 'EOF'
 # Security Policy
 
@@ -502,7 +543,7 @@ All developers must:
 4. Verify dependencies before installing
 5. Follow the principle of least privilege
 
-For detailed guidelines, see: `LLM-Security-Guidelines.md`
+For detailed guidelines, see: `docs/LLM-Security-Guidelines.md`
 
 ## Incident Response
 
@@ -521,6 +562,7 @@ If you suspect a security incident:
 EOF
 
 status "SECURITY.md created"
+fi
 echo ""
 
 # 9. Final scan
@@ -556,7 +598,7 @@ fi
 echo "  • SECURITY.md"
 echo ""
 echo "📖 Next steps:"
-echo "  1. Review LLM-Security-Guidelines.md"
+echo "  1. Review docs/LLM-Security-Guidelines.md"
 echo "  2. Copy .env.example to .env and fill with real values"
 echo "  3. Run: ./scripts/security/daily-check.sh"
 echo "  4. Configure Supabase RLS policies"
@@ -564,8 +606,8 @@ echo "  5. Set up Netlify environment variables"
 echo "  6. Enable GitHub Advanced Security"
 echo ""
 echo "🔗 Important files:"
-echo "  • Full guidelines: LLM-Security-Guidelines.md"
-echo "  • Quick reference: Security-Quick-Reference.md"
+echo "  • Full guidelines: docs/LLM-Security-Guidelines.md"
+echo "  • Quick reference: docs/Security-Quick-Reference.md"
 echo "  • Daily checks: scripts/security/daily-check.sh"
 echo "  • Incident response: scripts/security/secret-leak-response.sh"
 echo ""
