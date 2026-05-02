@@ -1,0 +1,142 @@
+# Advanced Security Scan — Template
+#
+# PURPOSE: Extended scanning with TruffleHog and Trivy on top of the base workflow.
+#
+# BEFORE USE:
+#   1. Pin every action to a SHA (replace @tag refs below with @SHA  # tag).
+#      Run: pip install ratchet && ratchet pin .github/workflows/security-scan.yml
+#   2. Switch egress-policy from "audit" to "block" and verify the allowed-endpoints
+#      list covers everything your jobs actually reach (check the harden-runner summary
+#      after a few audit runs).
+#   3. This template does NOT replace .github/workflows/security-scan.yml — it is an
+#      opt-in addition for repos that want deeper scanning.
+#
+# SECRETS REQUIRED:
+#   - GITLEAKS_LICENSE  (gitleaks.io — for gitleaks-action)
+#   - No additional secrets for TruffleHog or Trivy (they use GITHUB_TOKEN)
+
+name: Advanced Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "0 3 * * 1"  # Weekly Monday 03:00 UTC
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+
+  # ------------------------------------------------------------------
+  # TruffleHog — deep secret scan including git history and entropy
+  # ------------------------------------------------------------------
+  trufflehog-scan:
+    name: trufflehog-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2  # PIN TO SHA BEFORE USE
+        with:
+          egress-policy: audit  # Change to "block" after verifying endpoints
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+
+      - name: Checkout repository
+        uses: actions/checkout@v4  # PIN TO SHA BEFORE USE
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Run TruffleHog
+        uses: trufflesecurity/trufflehog@main  # PIN TO SHA BEFORE USE
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
+          extra_args: --only-verified
+
+  # ------------------------------------------------------------------
+  # Trivy — filesystem vulnerability scan (dependencies + misconfigs)
+  # ------------------------------------------------------------------
+  trivy-scan:
+    name: trivy-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required to upload SARIF results
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2  # PIN TO SHA BEFORE USE
+        with:
+          egress-policy: audit  # Change to "block" after verifying endpoints
+          allowed-endpoints: >
+            api.github.com:443
+            ghcr.io:443
+            github.com:443
+
+      - name: Checkout repository
+        uses: actions/checkout@v4  # PIN TO SHA BEFORE USE
+        with:
+          persist-credentials: false
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@master  # PIN TO SHA BEFORE USE
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: sarif
+          output: trivy-results.sarif
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+
+      - name: Upload Trivy SARIF results
+        uses: github/codeql-action/upload-sarif@v3  # PIN TO SHA BEFORE USE
+        if: always()
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
+
+  # ------------------------------------------------------------------
+  # SBOM — generate a Software Bill of Materials
+  # ------------------------------------------------------------------
+  sbom:
+    name: sbom
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to attach SBOM to release
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2  # PIN TO SHA BEFORE USE
+        with:
+          egress-policy: audit  # Change to "block" after verifying endpoints
+          allowed-endpoints: >
+            api.github.com:443
+            ghcr.io:443
+            github.com:443
+
+      - name: Checkout repository
+        uses: actions/checkout@v4  # PIN TO SHA BEFORE USE
+        with:
+          persist-credentials: false
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0  # PIN TO SHA BEFORE USE
+        with:
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@v4  # PIN TO SHA BEFORE USE
+        with:
+          name: sbom
+          path: sbom.spdx.json
+          retention-days: 90
