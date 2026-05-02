@@ -131,9 +131,6 @@
     # Prevent MIME type sniffing
     X-Content-Type-Options = "nosniff"
     
-    # XSS Protection (legacy browsers)
-    X-XSS-Protection = "1; mode=block"
-    
     # Referrer Policy
     Referrer-Policy = "strict-origin-when-cross-origin"
     
@@ -151,10 +148,12 @@
     
     # Content Security Policy (CSP)
     # ⚠️ CUSTOMIZE THIS FOR YOUR APP
+    # ❌ 'unsafe-inline' and 'unsafe-eval' defeat most CSP protection — remove them.
+    #    Use nonces or hashes for inline scripts instead.
     Content-Security-Policy = '''
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.example.com;
-      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      script-src 'self' https://cdn.example.com;
+      style-src 'self' https://fonts.googleapis.com;
       img-src 'self' data: https: blob:;
       font-src 'self' https://fonts.gstatic.com;
       connect-src 'self' https://*.supabase.co https://api.example.com;
@@ -462,7 +461,7 @@
 # - https://docs.netlify.com/edge-functions/overview/
 
 # Security Best Practices:
-# - https://docs.netlify.com/security/secure-access-to-sites/
+# - https://docs.netlify.com/manage/security/overview
 # - https://securityheaders.com (test your headers)
 # - https://observatory.mozilla.org (security assessment)
 
