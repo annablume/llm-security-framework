@@ -273,11 +273,25 @@ else
 fi
 
 # Check branch protection
-current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
 protected_branches=("main" "master" "production")
 
-if [[ " ${protected_branches[@]} " =~ " ${current_branch} " ]]; then
-    echo "❌ Direct push to protected branch '$current_branch' not allowed"
+push_blocked=false
+blocked_branch=""
+
+while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+    if [[ "$local_sha" == "0000000000000000000000000000000000000000" ]]; then
+        continue
+    fi
+    remote_branch="${remote_ref#refs/heads/}"
+    if [[ " ${protected_branches[@]} " =~ " ${remote_branch} " ]]; then
+        push_blocked=true
+        blocked_branch="$remote_branch"
+        break
+    fi
+done
+
+if [[ "$push_blocked" == "true" ]]; then
+    echo "❌ Direct push to protected branch '$blocked_branch' not allowed"
     echo "Create a pull request instead"
     exit 1
 fi
