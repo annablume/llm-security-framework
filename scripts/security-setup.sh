@@ -511,6 +511,7 @@ jobs:
           egress-policy: block
           allowed-endpoints: >
             api.github.com:443
+            gitleaks.io:443
             github.com:443
 
       - name: Checkout repository
