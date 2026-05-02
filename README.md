@@ -1,7 +1,7 @@
 # 🔒 LLM Security Framework - Complete Package
 
-**Version 2.0 | Production Ready**  
-**Created**: November 14, 2025
+**Version 2.1 | Production Ready**  
+**Created**: November 14, 2025 | **Updated**: May 2026
 
 ---
 
