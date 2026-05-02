@@ -164,6 +164,8 @@ docs/infrastructure/ @org/security-team @org/devops-team
 Create `.github/workflows/security-scan.yml`:
 
 ```yaml
+# NOTE: Pin every uses: to a commit SHA in production (not @v4/@master/@main).
+# See .github/workflows/security-scan.yml in this repo for SHA-pinned examples.
 name: Security Scan
 
 on:
@@ -678,7 +680,7 @@ Use this to verify configuration:
 
 ---
 
-**Document Version**: 2.0  
-**Last Review**: 2025-11-14  
-**Next Review**: 2025-12-14  
+**Document Version**: 2.1  
+**Last Review**: 2026-05-02  
+**Next Review**: 2026-08-02  
 **Owner**: Security Team

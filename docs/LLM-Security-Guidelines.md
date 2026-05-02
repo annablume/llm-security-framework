@@ -367,6 +367,8 @@ echo "✅ No secrets detected"
 
 ```yaml
 # .github/workflows/security-scan.yml
+# NOTE: Pin every uses: to a commit SHA in production (not @v4/@main).
+# See .github/workflows/security-scan.yml in this repo for SHA-pinned examples.
 name: Security Scan
 
 on:
@@ -1082,6 +1084,7 @@ npm view <package> dist.unpackedSize
 
 ```yaml
 # .github/workflows/dependency-security.yml
+# NOTE: Pin every uses: to a commit SHA in production (not @master/@v3).
 name: Dependency Security
 
 on:
@@ -1150,6 +1153,7 @@ save-prefix=""
 
 ```yaml
 # .github/workflows/lockfile-verification.yml
+# NOTE: Pin every uses: to a commit SHA in production (not @v4).
 name: Verify Lockfiles
 
 on:
@@ -2119,7 +2123,8 @@ This document should be reviewed and updated:
 - **Annually**: Complete security posture review
 
 **Document Owner**: Security Team  
-**Next Review Date**: 2025-12-14
+**Last Review**: 2026-05-02  
+**Next Review Date**: 2026-08-02
 
 ---
 
