@@ -105,6 +105,6 @@ This repository ships the following security infrastructure—use it, don't dupl
 | **Pre-push hook (extended, optional)** | `templates/pre-push.template` | Stricter/longer variant; copy manually **only** after reading `templates/README.md` |
 | **AI context protection** | `.cursorignore` / `templates/.cursorignore.template` | Prevents secrets, build artifacts, and logs from loading into Cursor/Claude context windows |
 | **CODEOWNERS** | `.github/CODEOWNERS` | Enforces review on all security-sensitive paths |
-| **Incident response** | `docs/incident-response-template.md` | Structured timeline and RCA template for security events |
+| **Incident response** | `examples/incident-response-template.md` | Structured timeline and RCA template for security events |
 
 Also align significant workflow changes with `docs/LLM-Security-Guidelines.md` (sections 1–3 cover Cursor/Claude Code/GitHub Actions threat models) and `docs/GitHub-Security-Configuration.md` (branch protection, OIDC, Dependabot setup).

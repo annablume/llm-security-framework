@@ -1,7 +1,7 @@
 # LLM-Assisted Development Security Guidelines
 **Version 2.0 - Production Ready**  
 **Stack**: Claude Code, Cursor, GitHub, Netlify, Supabase  
-**Last Updated**: 2nd May 2025
+**Last Updated**: 2nd May 2026
 
 ---
 

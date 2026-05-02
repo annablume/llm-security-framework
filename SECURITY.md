@@ -405,8 +405,8 @@ It does NOT apply to:
 
 ## 🔄 Updates to This Policy
 
-**Last Updated**: November 2025  
-**Version**: 2.0
+**Last Updated**: May 2026  
+**Version**: 2.1
 
 We may update this security policy from time to time. Changes will be:
 - Committed to this repository
