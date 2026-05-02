@@ -1,0 +1,123 @@
+# Advanced Dependency Check — Template
+#
+# PURPOSE: Deep dependency scanning with Snyk and OWASP Dependency-Check,
+#          complementing the base npm audit in .github/workflows/security-scan.yml.
+#
+# BEFORE USE:
+#   1. Pin every action to a SHA (replace @tag refs below with @SHA  # tag).
+#      Run: pip install ratchet && ratchet pin .github/workflows/dependency-check.yml
+#   2. Switch egress-policy from "audit" to "block" and verify the allowed-endpoints
+#      list covers everything your jobs actually reach.
+#   3. Add required secrets to your repository (see below).
+#
+# SECRETS REQUIRED:
+#   - SNYK_TOKEN  (app.snyk.io → Account Settings → Auth Token)
+
+name: Advanced Dependency Check
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "0 4 * * 2"  # Weekly Tuesday 04:00 UTC
+
+permissions:
+  contents: read
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+jobs:
+
+  # ------------------------------------------------------------------
+  # Snyk — developer-friendly vulnerability + licence scanning
+  # Requires: SNYK_TOKEN secret
+  # ------------------------------------------------------------------
+  snyk:
+    name: snyk
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required to upload SARIF results
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2  # PIN TO SHA BEFORE USE
+        with:
+          egress-policy: audit  # Change to "block" after verifying endpoints
+          allowed-endpoints: >
+            api.github.com:443
+            api.snyk.io:443
+            github.com:443
+            registry.npmjs.org:443
+
+      - name: Checkout repository
+        uses: actions/checkout@v4  # PIN TO SHA BEFORE USE
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4  # PIN TO SHA BEFORE USE
+        with:
+          node-version: "24"
+
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master  # PIN TO SHA BEFORE USE
+        continue-on-error: true  # Upload results even if vulnerabilities found
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif
+
+      - name: Upload Snyk SARIF results
+        uses: github/codeql-action/upload-sarif@v3  # PIN TO SHA BEFORE USE
+        if: always()
+        with:
+          sarif_file: snyk.sarif
+          category: snyk
+
+  # ------------------------------------------------------------------
+  # OWASP Dependency-Check — CVE database scan for known vulnerabilities
+  # No additional secrets required (uses NVD public feed).
+  # ------------------------------------------------------------------
+  owasp-dependency-check:
+    name: owasp-dependency-check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required to upload SARIF results
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@v2  # PIN TO SHA BEFORE USE
+        with:
+          egress-policy: audit  # Change to "block" after verifying endpoints
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            nvd.nist.gov:443
+            jeremylong.github.io:443
+            registry.npmjs.org:443
+
+      - name: Checkout repository
+        uses: actions/checkout@v4  # PIN TO SHA BEFORE USE
+        with:
+          persist-credentials: false
+
+      - name: Run OWASP Dependency-Check
+        uses: dependency-check/Dependency-Check_Action@main  # PIN TO SHA BEFORE USE
+        with:
+          project: ${{ github.repository }}
+          path: .
+          format: SARIF
+          out: dependency-check-report
+          args: >-
+            --failOnCVSS 7
+            --enableRetired
+
+      - name: Upload OWASP SARIF results
+        uses: github/codeql-action/upload-sarif@v3  # PIN TO SHA BEFORE USE
+        if: always()
+        with:
+          sarif_file: dependency-check-report/dependency-check-report.sarif
+          category: owasp-dependency-check

@@ -10,6 +10,15 @@ Optional reference files used when **manually** hardening a repository.
 
 See also [CONTRIBUTING.md](../CONTRIBUTING.md) (maintainer section) for parity expectations.
 
+## GitHub Actions workflow templates
+
+- **`.github/workflows/security-scan.yml`** — Advanced scanning add-on: TruffleHog (deep secret + entropy scan), Trivy (filesystem vulnerability scan with SARIF upload), and SBOM generation. Complements the base `security-scan.yml`, does not replace it.
+- **`.github/workflows/dependency-check.yml`** — Deep dependency scanning: Snyk (requires `SNYK_TOKEN` secret) and OWASP Dependency-Check (NVD CVE feed, no extra secret needed).
+
+**Before using either template:**
+1. Pin every action to a SHA — they ship with `@tag` refs as placeholders. Use `ratchet pin` or resolve SHAs manually.
+2. Run with `egress-policy: audit` first, then switch to `block` once you have verified the allowed-endpoints list.
+
 ## Other files
 
 - **`.cursorignore.template`** — stricter Cursor ignore preset (may exclude all of `.cursor/`).
