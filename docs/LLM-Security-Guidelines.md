@@ -774,11 +774,18 @@ export const handler: Handler = async (
   [headers.values]
     X-Frame-Options = "DENY"
     X-Content-Type-Options = "nosniff"
-    X-XSS-Protection = "1; mode=block"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "geolocation=(), microphone=(), camera=()"
-    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.example.com"
+    Strict-Transport-Security = "max-age=63072000; includeSubDomains; preload"
+    # ⚠️ Customize CSP for your app — remove 'unsafe-inline'/'unsafe-eval' in production
+    Content-Security-Policy = "default-src 'self'; script-src 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
 ```
+
+> **Note**: Custom headers configured in `netlify.toml` do **not** apply to responses from Netlify Functions or Edge Functions. Those must set their own headers in the response object.
+
+#### 🔐 Secrets Controller
+
+For sensitive environment variables, use Netlify's **Secrets Controller** (Site settings → Environment variables → mark as secret). Secrets are encrypted at rest, redacted from logs, and not exposed to the Netlify UI after saving — unlike regular environment variables.
 
 ---
 
@@ -2052,7 +2059,7 @@ This document should be reviewed and updated:
 - **Supabase Security**: https://supabase.com/docs/guides/security
 - **Supabase RLS**: https://supabase.com/docs/guides/database/postgres/row-level-security
 - **GitHub Security**: https://docs.github.com/en/code-security
-- **Netlify Security**: https://docs.netlify.com/security/
+- **Netlify Security**: https://docs.netlify.com/manage/security/overview
 
 ---
 
