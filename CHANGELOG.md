@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [Unreleased]
+
+### Maintainer housekeeping
+
+- Documented workflow/installer parity expectations, `templates/` versus minimal hooks, bundled `.cursor` workflow security skill, and a vendor revalidation table in [README.md](README.md).
+- **Template QA:** After edits to `.github/PULL_REQUEST_TEMPLATE.md` or `.github/ISSUE_TEMPLATE/`, smoke-test on github.com and append the verification date here or in the README maintainer table.
+
+---
+
 ## [2.0.0] - 2025-11-14
 
 ### 🎉 Initial Release
