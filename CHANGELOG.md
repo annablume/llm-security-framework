@@ -9,10 +9,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Maintainer housekeeping
+---
 
-- Documented workflow/installer parity expectations, `templates/` versus minimal hooks, bundled `.cursor` workflow security skill, and a vendor revalidation table in [README.md](README.md).
-- **Template QA:** After edits to `.github/PULL_REQUEST_TEMPLATE.md` or `.github/ISSUE_TEMPLATE/`, smoke-test on github.com and append the verification date here or in the README maintainer table.
+## [2.1.0] - 2026-05-02
+
+### Security
+
+- Switched `step-security/harden-runner` to `block` mode with verified egress allowlist across all CI workflows and the installer heredoc in `security-setup.sh`
+- Added `GITLEAKS_LICENSE` secret wiring and `api.github.com:443` / `gitleaks.io:443` to the secret-scan job egress allowlist (required by gitleaks-action v2)
+
+### Fixed
+
+- Pre-push hook: was checking local branch name (`git symbolic-ref HEAD`) instead of reading the push target from stdin — any push from a local `main` branch falsely blocked even when targeting a non-protected remote ref; now reads `remote_ref` from stdin and skips deletion pushes (all-zero SHA)
+- Pre-push hook example in `docs/LLM-Security-Guidelines.md` updated to match the corrected stdin approach
+- `pkill` target corrected from `claude-code` to `claude` (the actual process name)
+- Fabricated `claude-code` CLI flags (`--audit-log`, `--read-only`, `--allowed-paths`, `review-session`) replaced with real in-session slash commands (`/permissions`, `/status`, `/help`) and `settings.json` knobs
+- Wrong incident-response path in `.cursor/skills/ai-security-workflows/SKILL.md` (`docs/` → `examples/`)
+- Version numbers and year updated across `SECURITY.md`, `CONTRIBUTING.md`, and the guidelines header (2025 → 2026)
+
+### Changed
+
+- **Cursor security** (Section 1): Added Privacy Mode / ZDR, `.cursorindexingignore`, `.cursorignore` terminal/MCP caveats, Rules security, MCP server risks; removed stale settings keys
+- **Claude Code security** (Section 2): Complete rewrite — removed invented flags, documented real permission model (`deny`/`ask`/`allow`), permission modes (`plan`, `default`, `acceptEdits`, `bypassPermissions`), sandbox, `denyTools`, `CLAUDE.md` trust model, and managed settings
+- **Supabase RLS** (Section 4): Updated policies to use `(select auth.uid())` wrapping for performance, `TO authenticated`, `raw_app_meta_data` for role claims, null guard, security definer functions; added `examples/supabase-rls-policies.sql` with 10 real policy sections
+- **Netlify headers** (Section 5): Removed deprecated `X-XSS-Protection`, removed `'unsafe-inline'`/`'unsafe-eval'` CSP defaults, added function-header caveat, documented Secrets Controller; updated `examples/netlify.toml.example`
+- **README.md**: Fixed stale paths, added sections for CI workflows, `templates/`, `examples/`, editor skills, hygiene files; added maintainer revalidation table and v2.1 version history
+- **Template files**: Filled previously empty `templates/.github/workflows/security-scan.yml` (TruffleHog, Trivy, SBOM jobs) and `templates/.github/workflows/dependency-check.yml` (Snyk, OWASP Dependency-Check); added `templates/README.md`
+
+### Maintainer notes
+
+- `security-scan.yml` and the heredoc emitted by `security-setup.sh` must stay identical for new installs — see header comment in the workflow file
+- After edits to `.github/PULL_REQUEST_TEMPLATE.md` or `.github/ISSUE_TEMPLATE/`, smoke-test on github.com and record the date in the README maintainer table
 
 ---
 
@@ -252,28 +279,6 @@ N/A - Initial release. For setup instructions, see [README.md](README.md) and ru
 
 ---
 
-## [Unreleased]
-
-### Planned Features
-- Additional cloud provider configurations (AWS, Azure, GCP)
-- VS Code extension security guidelines
-- Terraform/IaC security templates
-- Security training modules
-- Video tutorials
-- Interactive security checklist tool
-- GitLab CI/CD templates
-- Jenkins pipeline security
-- Additional language-specific examples (Go, Rust, Java)
-
-### Under Consideration
-- Bug bounty program
-- Security certification program
-- Community-contributed templates
-- Integration with security tools (Semgrep, CodeQL)
-- Automated security reporting dashboard
-
----
-
 ## How to Update This Changelog
 
 ### For Maintainers
@@ -337,7 +342,8 @@ Following [Semantic Versioning](https://semver.org/):
 
 | Version | Release Date | Highlights |
 |---------|--------------|------------|
-| [2.0.0](#200---2025-11-14) | 2025-11-14 | 🎉 Initial production release |
+| [2.1.0](#210---2026-05-02) | 2026-05-02 | Security hardening, doc accuracy pass, hook bug fix |
+| [2.0.0](#200---2025-11-14) | 2025-11-14 | Initial production release |
 
 ---
 
@@ -352,5 +358,6 @@ Following [Semantic Versioning](https://semver.org/):
 
 ---
 
+**[2.1.0]**: https://github.com/annablume/llm-security-framework/compare/v2.0.0...v2.1.0
 **[2.0.0]**: https://github.com/annablume/llm-security-framework/releases/tag/v2.0.0
-**[Unreleased]**: https://github.com/annablume/llm-security-framework/compare/v2.0.0...HEAD
+**[Unreleased]**: https://github.com/annablume/llm-security-framework/compare/v2.1.0...HEAD
