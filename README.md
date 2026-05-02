@@ -614,5 +614,5 @@ Recommended external training:
 ---
 
 *Package created: November 14, 2025*  
-*Framework version: 2.0*  
+*Framework version: 2.1*  
 *Maintained by: Security Team*
