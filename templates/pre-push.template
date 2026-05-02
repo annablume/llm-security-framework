@@ -83,11 +83,26 @@ echo ""
 
 echo "2️⃣  Checking branch protection..."
 
-current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
 protected_branches=("main" "master" "production" "prod")
 
-if [[ " ${protected_branches[@]} " =~ " ${current_branch} " ]]; then
-    echo -e "${RED}❌ PUSH BLOCKED: Direct push to protected branch '$current_branch'${NC}"
+push_blocked=false
+blocked_branch=""
+
+while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+    # Skip deletions (local sha is all zeros)
+    if [[ "$local_sha" == "0000000000000000000000000000000000000000" ]]; then
+        continue
+    fi
+    remote_branch="${remote_ref#refs/heads/}"
+    if [[ " ${protected_branches[@]} " =~ " ${remote_branch} " ]]; then
+        push_blocked=true
+        blocked_branch="$remote_branch"
+        break
+    fi
+done
+
+if [[ "$push_blocked" == "true" ]]; then
+    echo -e "${RED}❌ PUSH BLOCKED: Direct push to protected branch '$blocked_branch'${NC}"
     echo ""
     echo "Protected branches require pull requests"
     echo ""
