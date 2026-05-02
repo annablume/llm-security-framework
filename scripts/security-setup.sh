@@ -443,22 +443,77 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 jobs:
-  secret-scan:
-    name: secret-scan
+  workflow-lint:
+    name: workflow-lint
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
     permissions:
       contents: read
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450  # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          persist-credentials: false
+
+      - name: Install zizmor
+        run: pip install -r .github/workflows/requirements.txt
+
+      - name: Run zizmor
+        run: zizmor --format sarif .github/workflows/ > zizmor.sarif
+        continue-on-error: true
+
+      - name: Fail on high/critical findings
+        run: |
+          HIGH=$(python3 -c "
+          import json, sys
+          s = json.load(open('zizmor.sarif'))
+          findings = [
+            r for run in s.get('runs', [])
+            for r in run.get('results', [])
+            if r.get('level') in ('error', 'warning')
+          ]
+          print(len(findings))
+          for f in findings:
+            msg = f.get('message', {}).get('text', '')
+            locs = f.get('locations', [{}])
+            loc = locs[0].get('physicalLocation', {}).get('artifactLocation', {}).get('uri', '')
+            line = locs[0].get('physicalLocation', {}).get('region', {}).get('startLine', '?')
+            print(f'  [{f[\"level\"].upper()}] {loc}:{line} — {msg}')
+          ")
+          COUNT=$(echo "$HIGH" | head -1)
+          echo "$HIGH"
+          if [ "$COUNT" -gt 0 ]; then
+            echo "zizmor found $COUNT high/critical finding(s) — see above."
+            exit 1
+          fi
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450  # v2.19.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Run gitleaks
-        uses: gitleaks/gitleaks-action@v2.3.9
+        uses: gitleaks/gitleaks-action@ff98106e4c7b2bc287b24eaf42907196329070c7  # v2.3.9
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -468,8 +523,15 @@ jobs:
     permissions:
       contents: read
     steps:
+      - name: Harden runner
+        uses: step-security/harden-runner@a5ad31d6a139d249332a2605b85202e8c0b78450  # v2.19.1
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
+        with:
+          persist-credentials: false
 
       - name: Detect supported dependency manifests
         id: detect-manifests
@@ -483,9 +545,7 @@ jobs:
 
       - name: Set up Node.js
         if: steps.detect-manifests.outputs.npm == 'true'
-        env:
-          FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e  # v6
         with:
           node-version: "24"
 
@@ -502,6 +562,12 @@ jobs:
         run: echo "No npm lockfile found; dependency scan skipped."
 EOF
     status "GitHub Actions workflow created or updated"
+
+    # Write zizmor pin file (read by workflow-lint job)
+    cat > .github/workflows/requirements.txt << 'EOF'
+zizmor==1.24.1
+EOF
+    status "zizmor requirements.txt created: .github/workflows/requirements.txt"
     fi
 else
     warning "No .github/workflows directory found, skipping GitHub Actions setup"
