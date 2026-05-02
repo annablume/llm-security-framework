@@ -1562,7 +1562,7 @@ echo "STEP 1: Isolating AI interactions..."
 # 1. Close all Cursor/Claude Code sessions
 # 2. Kill any running AI processes
 pkill -f "cursor"
-pkill -f "claude-code"
+pkill -f "claude"
 
 # STEP 2: PRESERVE EVIDENCE
 echo "STEP 2: Preserving evidence..."
@@ -1880,15 +1880,17 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# 2. Branch protection check
-current_branch=$(git symbolic-ref HEAD | sed -e 's,.*/\(.*\),\1,')
+# 2. Branch protection check (reads remote refs from stdin — not the local branch name)
 protected_branches=("main" "master" "production")
-
-if [[ " ${protected_branches[@]} " =~ " ${current_branch} " ]]; then
-  echo "❌ Direct push to protected branch '$current_branch' not allowed"
-  echo "Create a pull request instead"
-  exit 1
-fi
+while IFS=' ' read -r local_ref local_sha remote_ref remote_sha; do
+  if [[ "$local_sha" == "0000000000000000000000000000000000000000" ]]; then continue; fi
+  remote_branch="${remote_ref#refs/heads/}"
+  if [[ " ${protected_branches[@]} " =~ " ${remote_branch} " ]]; then
+    echo "❌ Direct push to protected branch '$remote_branch' not allowed"
+    echo "Create a pull request instead"
+    exit 1
+  fi
+done
 
 # 3. Run tests
 echo "Running tests..."
@@ -2003,17 +2005,22 @@ Cmd/Ctrl + Shift + P > "Cursor: Disable Web Search"
 ### Claude Code Security Commands
 
 ```bash
-# Audit mode (logs all commands)
-claude-code --audit-log ~/.claude-code/audit.log
+# Check current permission settings and active rules
+/permissions
 
-# Read-only mode (for production debugging)
-claude-code --read-only
+# Show which tools are allowed/denied in this session
+/status
 
-# Restrict file access
-claude-code --allowed-paths ./src,./tests
+# Review what Claude can and cannot do in this project
+# (reads CLAUDE.md and settings.json for the active project)
+/help
 
-# Review session
-claude-code review-session --session-id <id>
+# Restrict to plan-only mode (no file writes until you approve)
+# Set in .claude/settings.json:
+# { "defaultMode": "plan" }
+
+# Deny a specific tool for the session (add to settings.json):
+# { "denyTools": ["Bash", "Edit"] }
 ```
 
 ### GitHub Security Commands
