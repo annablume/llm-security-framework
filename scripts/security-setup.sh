@@ -202,6 +202,24 @@ cat > .git/hooks/pre-commit << 'EOF'
 #!/bin/bash
 # LLM Security Pre-Commit Hook
 
+# Prompt the user; fail safely (return 1) when /dev/tty is unavailable.
+# Git hook stdin is bound to git's pipes, so we must explicitly open the tty.
+# In CI / non-interactive shells (e.g. some IDE source-control panels) /dev/tty
+# cannot be opened — refuse the soft prompt and tell the user how to bypass.
+confirm() {
+    local prompt="$1"
+    if ! { exec 3</dev/tty; } 2>/dev/null; then
+        echo
+        echo "  Non-interactive shell — cannot prompt for confirmation."
+        echo "  To proceed anyway, re-run with: git commit --no-verify"
+        return 1
+    fi
+    read -p "$prompt " -n 1 -r REPLY <&3
+    exec 3<&-
+    echo
+    [[ $REPLY =~ ^[Yy]$ ]]
+}
+
 echo "🔍 Running security checks..."
 
 # Check for secrets with gitleaks
@@ -226,9 +244,7 @@ fi
 # Check for debug statements
 if git diff --cached | grep -E "console\.log|debugger"; then
     echo "⚠️  Debug statements found. Remove before committing."
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! confirm "Continue anyway? (y/N)"; then
         exit 1
     fi
 fi
