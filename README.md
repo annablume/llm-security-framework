@@ -1,11 +1,55 @@
-# 🔒 LLM Security Framework - Complete Package
+# LLM Security Framework
 
-**Version 2.1 | Production Ready**  
-**Created**: November 14, 2025 | **Updated**: May 2026
+Security for vibe-coded repos. One script adds secret scanning, AI context protection, and CI hardening to any project.
+
+## Get started
+
+Copy the setup script into your project and run it:
+
+> **New to this? Three things to know before you start:**
+> - **Secrets** are values like `STRIPE_KEY=<your-key>` or `DATABASE_URL=postgresql://<user>:<pass>@host/db`. They live in `.env` files. Never paste them into AI chat and never commit them to git.
+> - **AI tools read your whole repo.** Cursor and Claude Code send file context to cloud servers — the `.cursorignore` this script creates stops your credentials from being included in that context.
+> - **Git history is permanent.** Deleting a file doesn't erase it from `git log`. The pre-commit hook this script installs catches secrets *before* they're committed, which is the only safe moment to catch them.
+
+```bash
+cp /path/to/llm-security-framework/scripts/security-setup.sh .
+chmod +x security-setup.sh && ./security-setup.sh
+```
+
+What it sets up (~5 min):
+- Pre-commit secret scanning (Gitleaks) so secrets never reach git history
+- `.cursorignore` / `.gitignore` so AI tools can't see your credentials
+- Pre-push hook that blocks direct pushes to main
+- GitHub Actions security workflow (secret scan + dependency audit)
+
+Already have a project? See [Existing Projects](#existing-projects) below.
 
 ---
 
-## 📦 What's Included
+## 🚀 Quick Start Guide
+
+### For New Projects
+
+```bash
+cp /path/to/llm-security-framework/scripts/security-setup.sh .
+chmod +x security-setup.sh && ./security-setup.sh
+```
+
+### <a name="existing-projects"></a>For Existing Projects
+
+**Phase 1: Assessment**
+- Scan for secrets and audit dependencies: `gitleaks detect --source . --verbose` and `npm audit`.
+
+**Phase 2: Remediation**
+- Run `./security-setup.sh`; if secrets were found, follow LLM-Security-Guidelines.md Section 10 and rotate all exposed keys.
+
+**Phase 3: Hardening**
+- Configure GitHub per GitHub-Security-Configuration.md, set up Supabase RLS (Section 4) and Netlify security (Section 5), and train team on Security-Quick-Reference.md.
+
+---
+
+<details>
+<summary>What's included (full inventory)</summary>
 
 This package contains everything you need to secure your AI-assisted development workflow with Claude Code, Cursor, GitHub, Netlify, and Supabase.
 
@@ -163,73 +207,7 @@ Copy to `~/.claude/skills/` or `~/.cursor/skills/` to reuse the skill in other r
 
 `CHANGELOG.md` · `CONTRIBUTING.md` · `SECURITY.md` · `LICENSE`
 
----
-
-## 🚀 Quick Start Guide
-
-### For New Projects
-
-**Step 1**: Read the basics (15 minutes)
-```
-□ Read Security-Quick-Reference.md
-□ Skim LLM-Security-Guidelines.md sections 1-6
-```
-
-**Step 2**: Run automated setup (5 minutes)
-```bash
-cd your-project
-./security-setup.sh
-```
-
-**Step 3**: Configure GitHub (30 minutes)
-```
-□ Follow GitHub-Security-Configuration.md
-□ Enable GitHub Advanced Security
-□ Set up branch protection
-□ Create CODEOWNERS file
-```
-
-**Step 4**: Team onboarding (ongoing)
-```
-□ Share Security-Quick-Reference.md with team
-□ Schedule security training
-□ Add to onboarding checklist
-```
-
----
-
-### For Existing Projects
-
-**Phase 1: Assessment** (1 hour)
-```bash
-# Run security scan
-gitleaks detect --source . --verbose
-
-# Check for exposed secrets
-git log --all -p | grep -i "api_key\|secret\|password"
-
-# Audit dependencies
-npm audit
-```
-
-**Phase 2: Remediation** (2-4 hours)
-```bash
-# Run setup script
-./security-setup.sh
-
-# Clean history if secrets found
-# (Follow LLM-Security-Guidelines.md Section 10)
-
-# Rotate all potentially compromised keys
-```
-
-**Phase 3: Hardening** (2-3 hours)
-```
-□ Configure GitHub per GitHub-Security-Configuration.md
-□ Set up Supabase RLS (LLM-Security-Guidelines.md Section 4)
-□ Configure Netlify security (LLM-Security-Guidelines.md Section 5)
-□ Train team on Security-Quick-Reference.md
-```
+</details>
 
 ---
 
@@ -253,7 +231,8 @@ Usage Frequency:
 
 ---
 
-## 🎯 Role-Based Reading Guide
+<details>
+<summary>Reading guide by role (developer / lead / security / devops)</summary>
 
 ### **Developers** (Individual Contributors)
 **Must Read**:
@@ -306,9 +285,10 @@ Usage Frequency:
 - ✅ Set up monitoring and alerting
 - ✅ Maintain secret rotation schedule
 
----
+</details>
 
-## ⚠️ Critical Implementation Priorities
+<details>
+<summary>Implementation priorities (critical / high / medium)</summary>
 
 ### 🔴 **CRITICAL** (Do within 24 hours)
 1. Run `security-setup.sh` on all repositories
@@ -330,6 +310,8 @@ Usage Frequency:
 3. Set up monitoring and alerting
 4. Document incident response procedures
 5. Schedule monthly security reviews
+
+</details>
 
 ---
 
@@ -585,34 +567,8 @@ Recommended external training:
 
 ---
 
-## 🏁 Next Steps
-
-**Right Now** (5 minutes):
-1. Read Security-Quick-Reference.md
-2. Print it and put it at your desk
-3. Check if Gitleaks is installed: `gitleaks version`
-
-**Today** (1 hour):
-1. Run security-setup.sh on your main repository
-2. Fix any secrets it finds
-3. Share Security-Quick-Reference.md with your team
-
-**This Week** (3-4 hours):
-1. Read LLM-Security-Guidelines.md sections 1-7
-2. Configure GitHub per GitHub-Security-Configuration.md
-3. Schedule team security training session
-
-**This Month**:
-1. Complete full security framework implementation
-2. Train all team members
-3. Schedule first monthly security review
-
----
-
 **Remember**: Security is not a one-time setup—it's a continuous practice. Start small, be consistent, and improve iteratively.
 
 ---
 
-*Package created: November 14, 2025*  
-*Framework version: 2.1*  
-*Maintained by: Security Team*
+*Version 2.1 | Production Ready | Created: November 14, 2025 | Updated: May 2026 | Maintained by: Security Team*
