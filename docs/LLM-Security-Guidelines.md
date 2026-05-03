@@ -41,11 +41,20 @@ Privacy Mode enforces Zero Data Retention (ZDR) with Cursor's model providers �
 
 **Threat**: Cursor indexes your workspace and sends relevant files as context with every request.
 
-#### `.cursorignore` — Block files from all AI features
+#### `.cursorignore` — Reduces accidental exposure (NOT a security boundary)
 
-`.cursorignore` prevents files from being accessed by Tab, Agent, Inline Edit, `@` mentions, and semantic search. Place it in the repository root.
+`.cursorignore` keeps listed paths out of Cursor's indexing, chat context, `@` mentions, Tab completion, Inline Edit, and Agent prompt context. It does **not** prevent the AI from reading those files via the terminal or MCP server tools. Treat it as accident-reduction, not access control.
 
-> **Important limitation**: `.cursorignore` does **not** restrict the terminal or MCP server tools used by Agent. Secrets accessible to a running process are still accessible to Agent via terminal commands.
+**What each ignore file actually blocks:**
+
+| Listed in… | Indexing / semantic search | Chat context, `@`, Tab, Agent prompt | Agent terminal (e.g. `cat .env`) | MCP server access |
+|---|---|---|---|---|
+| `.cursorignore` | yes | yes | **no** | **no** |
+| `.cursorindexingignore` | yes | no | no | no |
+
+**What this means in practice.** A user adds `.env` to `.cursorignore` and feels safe. They ask Agent *"what's in my .env?"*. Agent runs `cat .env` via the terminal tool, and the contents land in the model context window — exactly what the user thought they had blocked. If Agent has shell access (the default), any credential reachable via the shell is reachable to the model.
+
+**The only real isolations** are OS-level: deny Agent shell access entirely, run Agent inside a sandbox, or — best — keep credentials out of the filesystem (use a secret manager / vault and inject at runtime). Use `.cursorignore` to keep routine workflows clean; do not rely on it as a defense.
 
 > **Note**: Cursor automatically respects `.gitignore`. You don't need to duplicate those entries — focus `.cursorignore` on files that are untracked but still sensitive.
 
@@ -341,7 +350,9 @@ Settings > Code security and analysis >
   ✓ Push protection (CRITICAL)
 ```
 
-#### Pre-commit Hooks (Client-side)
+#### Pre-commit Hooks (Client-side, advisory only)
+
+> **These are guardrails, not enforcement.** Local hooks can be bypassed with `git commit --no-verify` and pre-push hooks with `git push --no-verify`. They catch honest mistakes; they do not stop a determined contributor or a compromised workstation. Real enforcement requires **GitHub Advanced Security with secret scanning push protection enabled** (server-side, applied uniformly to every contributor regardless of their local setup) — see *Enable GitHub Advanced Security* above.
 
 ```bash
 # Install gitleaks
@@ -362,6 +373,17 @@ fi
 
 echo "✅ No secrets detected"
 ```
+
+**What gitleaks misses — read this:**
+
+Gitleaks matches a built-in set of **known patterns** (AWS keys, Slack tokens, Stripe keys, GitHub tokens, Google API keys, etc.). It does NOT detect:
+
+- Custom internal tokens (e.g. `INTERNAL_BILLING=abc123`) that don't match a known regex
+- Opaque short tokens or app-specific keys with no distinguishable shape
+- Base64-encoded blobs that happen to contain credentials
+- Secrets placed in comments, markdown, fixtures, or non-code files with non-standard variable naming
+
+A clean gitleaks run does NOT mean "no secrets in your repo" — it means "no string matches a built-in pattern." **Keep all credentials in `.env` regardless of whether gitleaks would flag them.** For project-specific token formats, add a custom rule to `.gitleaks.toml` ([gitleaks configuration docs](https://github.com/gitleaks/gitleaks#configuration)) and review `.gitleaks.toml` in code review the same way you'd review a security policy.
 
 #### GitHub Actions Secret Scanning
 
