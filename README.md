@@ -1,6 +1,6 @@
 # LLM Security Framework
 
-Security for vibe-coded repos. One script adds secret scanning, AI context protection, and CI hardening to any project.
+Security guardrails for AI-assisted projects. One script installs local checks — secret scanning, AI-tool ignore files, and a CI scaffold — in about five minutes. See [What this is and isn't](#what-this-is-and-isnt) below for honest limits.
 
 ## Get started
 
@@ -9,7 +9,7 @@ Copy the setup script into your project and run it:
 > **New to this? Three things to know before you start:**
 > - **Secrets** are values like `STRIPE_KEY=<your-key>` or `DATABASE_URL=postgresql://<user>:<pass>@host/db`. They live in `.env` files. Never paste them into AI chat and never commit them to git.
 > - **AI tools read your whole repo.** Cursor and Claude Code send file context to cloud servers — the `.cursorignore` this script creates stops your credentials from being included in that context.
-> - **Git history is permanent.** Deleting a file doesn't erase it from `git log`. The pre-commit hook this script installs catches secrets *before* they're committed, which is the only safe moment to catch them.
+> - **Git history is permanent.** Deleting a file doesn't erase it from `git log`. The pre-commit hook catches secrets *before* they're committed. Hooks can be bypassed (`--no-verify`), so for real enforcement also enable GitHub push protection — see the GitHub setup guide.
 
 ```bash
 cp /path/to/llm-security-framework/scripts/security-setup.sh .
@@ -17,10 +17,10 @@ chmod +x security-setup.sh && ./security-setup.sh
 ```
 
 What it sets up (~5 min):
-- Pre-commit secret scanning (Gitleaks) so secrets never reach git history
-- `.cursorignore` / `.gitignore` so AI tools can't see your credentials
-- Pre-push hook that blocks direct pushes to main
-- GitHub Actions security workflow (secret scan + dependency audit)
+- Pre-commit secret scanning (Gitleaks) — catches known secret patterns before they reach git history
+- `.cursorignore` / `.gitignore` — keeps your `.env` out of AI chat and indexing context
+- Pre-push hook that blocks direct pushes to `main`
+- GitHub Actions security workflow — only when `.github/workflows/` already exists
 
 Already have a project? See [Existing Projects](#existing-projects) below.
 
@@ -45,6 +45,24 @@ chmod +x security-setup.sh && ./security-setup.sh
 
 **Phase 3: Hardening**
 - Configure GitHub per GitHub-Security-Configuration.md, set up Supabase RLS (Section 4) and Netlify security (Section 5), and train team on Security-Quick-Reference.md.
+
+---
+
+## <a name="what-this-is-and-isnt"></a>What this is and isn't
+
+This framework gives you reasonable defaults for AI-assisted dev. It is not a complete security solution. Understand what it does and doesn't do *before* you trust it.
+
+**What it actually does well:**
+- Catches the most common mistakes: pasting known-format secrets into code, committing `.env`, pushing to `main`, picking up known-vulnerable dependencies.
+- Keeps `.env` out of routine AI tool context (Cursor / Claude Code chat and indexing).
+
+**What it does NOT do — read this:**
+- **Catch every secret.** Gitleaks matches *known patterns* (AWS keys, Slack tokens, Stripe keys, etc.). Custom internal tokens, opaque JWTs, and project-specific keys can slip through unnoticed. Treat all credentials as `.env`-only regardless of whether gitleaks flags them.
+- **Block AI-tool reads of your filesystem.** `.cursorignore` keeps files out of chat context and indexing — it does NOT stop the AI's terminal or MCP tools from running `cat .env`. If the AI has shell access, it can read whatever your shell can read.
+- **Enforce anything server-side.** Local hooks can be bypassed with `git commit --no-verify` or `git push --no-verify`. For real enforcement enable GitHub Advanced Security (secret scanning push protection) and branch protection rules — see `docs/GitHub-Security-Configuration.md`.
+- **Handle incident response.** When a secret leaks, *rotate the credential first*. History rewriting does not unexpose a key — forks, CI logs, GitHub PR caches, and archive.org persist it. See `docs/Security-Quick-Reference.md` for the correct order.
+
+**What requires manual setup:** Advanced CI tools (TruffleHog, Snyk, Trivy, SBOM), Supabase RLS policies, Netlify security headers, GitHub branch protection rules, CODEOWNERS. The framework documents these but does not install them.
 
 ---
 

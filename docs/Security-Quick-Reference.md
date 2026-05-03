@@ -171,13 +171,27 @@ git diff package.json                  # New deps verified?
 ## 🛠️ QUICK FIXES
 
 **Secret in commit?**
+
+**STOP.** Do not start by rewriting history.
+
+1. **Rotate the secret first** (Supabase / Netlify / GitHub / wherever it's used). Once a secret has been pushed, assume it is compromised — it lives on in forks, CI logs, GitHub PR caches, and archive.org. History rewriting does NOT unexpose it.
+2. **Check access logs** for unauthorized use of the old credential.
+3. **Then — and only then — clean history.** This step is destructive and breaks every clone of the repo. Coordinate with your team in writing before running it.
+
+History cleanup (run only after steps 1–2 and team coordination):
+
 ```bash
-# Use BFG Repo Cleaner (requires coordination)
+# Replace placeholders. secrets.txt = list of leaked strings, one per line.
 java -jar bfg.jar --replace-text secrets.txt repo.git
 cd repo && git reflog expire --expire=now --all
 git gc --prune=now --aggressive
-git push --force --all
 ```
+
+The force-push that follows is intentionally NOT in a code block. Type it manually so you cannot paste it by accident:
+
+> git push ‑‑force ‑‑all
+
+Every teammate must re-clone after the force-push. Anyone with an open PR will need to rebase. If you are the only contributor and unsure, stop and ask for help instead.
 
 **Cursor seeing sensitive files?**
 ```bash

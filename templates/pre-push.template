@@ -18,6 +18,24 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
+# Prompt the user; fail safely (return 1) when /dev/tty is unavailable.
+# Pre-push hooks have stdin bound to git's ref pipe, so we must explicitly
+# open the tty. In CI / non-interactive shells this open fails — refuse the
+# soft prompt and tell the user how to bypass.
+confirm() {
+    local prompt="$1"
+    if ! { exec 3</dev/tty; } 2>/dev/null; then
+        echo
+        echo "  Non-interactive shell — cannot prompt for confirmation."
+        echo "  To proceed anyway, re-run with: git push --no-verify"
+        return 1
+    fi
+    read -p "$prompt " -n 1 -r REPLY <&3
+    exec 3<&-
+    echo
+    [[ $REPLY =~ ^[Yy]$ ]]
+}
+
 echo -e "${BLUE}🔒 Running pre-push security checks...${NC}"
 echo ""
 
@@ -165,9 +183,7 @@ if [ -f "package.json" ]; then
         echo ""
         echo -e "${YELLOW}⚠️  Dependency vulnerabilities found${NC}"
         echo ""
-        read -p "Continue pushing with vulnerabilities? (y/N) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! confirm "Continue pushing with vulnerabilities? (y/N)"; then
             exit 1
         fi
     else
@@ -181,9 +197,7 @@ elif [ -f "requirements.txt" ]; then
         if [ $? -ne 0 ]; then
             echo ""
             echo -e "${YELLOW}⚠️  Python dependency vulnerabilities found${NC}"
-            read -p "Continue? (y/N) " -n 1 -r
-            echo
-            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            if ! confirm "Continue? (y/N)"; then
                 exit 1
             fi
         fi
@@ -231,9 +245,7 @@ if [ -f "package.json" ] && grep -q '"lint"' package.json; then
     if [ $? -ne 0 ]; then
         echo ""
         echo -e "${YELLOW}⚠️  Linting errors found${NC}"
-        read -p "Continue with linting errors? (y/N) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! confirm "Continue with linting errors? (y/N)"; then
             exit 1
         fi
     else
@@ -289,9 +301,7 @@ if [ -n "$large_files" ]; then
     echo "$large_files"
     echo ""
     echo "Consider using Git LFS for large files"
-    read -p "Continue? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! confirm "Continue? (y/N)"; then
         exit 1
     fi
 else
@@ -318,9 +328,7 @@ if [ $todo_count -gt 0 ]; then
     git diff "$range" | grep -n -E "^\+.*TODO|^\+.*FIXME" | head -5
     echo ""
     echo "Consider resolving these before pushing"
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    if ! confirm "Continue anyway? (y/N)"; then
         exit 1
     fi
 else
@@ -342,9 +350,7 @@ if [ -n "$url" ]; then
     if [[ ! "$url" =~ github.com ]] && [[ ! "$url" =~ gitlab.com ]] && [[ ! "$url" =~ bitbucket.org ]]; then
         echo -e "${YELLOW}⚠️  Unusual remote URL detected${NC}"
         echo "Remote: $url"
-        read -p "Is this correct? (y/N) " -n 1 -r
-        echo
-        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        if ! confirm "Is this correct? (y/N)"; then
             exit 1
         fi
     fi
