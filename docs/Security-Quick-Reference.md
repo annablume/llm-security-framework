@@ -106,6 +106,10 @@ git diff --staged | grep console.log   # Debug code?
 git diff package.json                  # New deps verified?
 ```
 
+> ⚠️ **Gitleaks catches known patterns only** (AWS, Slack, Stripe, GitHub, etc.). Custom internal tokens, opaque JWTs, and project-specific keys can slip through. Treat **all** credentials as `.env`-only regardless of what gitleaks reports.
+
+> ⚠️ **Local hooks can be bypassed** with `git commit --no-verify`. For real enforcement, enable GitHub push protection on the repo.
+
 ---
 
 ## 🔐 KEY MANAGEMENT RULES
